@@ -16,6 +16,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('lendings:delete-expired')->daily();
         $schedule->command('lendings:clean-old')->daily();
 
+        $schedule->command('books:fetch-trending')->daily();
+
+
     }
 
     /**
