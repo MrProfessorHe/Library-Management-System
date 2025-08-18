@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System - Presentation</title>
+    <script src="https://cdn.jsdelivr.net/npm/plantuml-encoder@1.4.0/dist/plantuml-encoder.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+        
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: white;
+            display: none;
+            padding: 40px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        .slide-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .slide-title {
+            font-size: 3em;
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        
+        .slide-subtitle {
+            font-size: 1.5em;
+            color: #666;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .slide-text {
+            font-size: 1.2em;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+        
+        .feature-list li {
+            padding: 10px 0;
+            font-size: 1.1em;
+            color: #333;
+            border-left: 4px solid #007bff;
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+        
+        .diagram-container {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+        
+        .diagram-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+        
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .tech-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #007bff;
+        }
+        
+        .tech-item h3 {
+            color: #007bff;
+            margin: 0 0 10px 0;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        
+        .nav-btn:hover {
+            background: #0056b3;
+        }
+        
+        .nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .slide-counter {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .stat-item {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        @media (max-width: 768px) {
+            .slide {
+                padding: 20px;
+            }
+            
+            .slide-title {
+                font-size: 2em;
+            }
+            
+            .two-column {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .tech-stack {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <div class="slide-counter">
+            <span id="current-slide">1</span> / <span id="total-slides">10</span>
+        </div>
+        
+        <!-- Slide 1: Title -->
+        <div class="slide active" id="slide-1">
+            <div class="slide-content">
+                <h1 class="slide-title">📚 Library Management System</h1>
+                <p class="slide-subtitle">A Modern Web-Based Library Management Solution</p>
+                <div class="highlight">
+                    <p class="slide-text" style="text-align: center; font-size: 1.3em;">
+                        Built with Laravel Framework<br>
+                        Complete Book Management & Lending System
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 2: System Overview -->
+        <div class="slide" id="slide-2">
+            <div class="slide-content">
+                <h1 class="slide-title">System Overview</h1>
+                <div class="two-column">
+                    <div>
+                        <h2 style="color: #007bff;">What is it?</h2>
+                        <p class="slide-text">
+                            A comprehensive web-based library management system that automates 
+                            book cataloging, user management, and lending operations.
+                        </p>
+                        <ul class="feature-list">
+                            <li>📖 Complete book catalog management</li>
+                            <li>👥 User registration and authentication</li>
+                            <li>📚 Book lending and return tracking</li>
+                            <li>💰 Automatic fine calculation</li>
+                            <li>📊 Admin dashboard with analytics</li>
+                        </ul>
+                    </div>
+                    <div class="diagram-container">
+                        <h3>System Architecture</h3>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                            <p style="text-align: center; font-size: 1.2em; color: #007bff;">
+                                🖥️ Web Interface<br>
+                                ↓<br>
+                                🔧 Laravel Backend<br>
+                                ↓<br>
+                                🗄️ MySQL Database<br>
+                                ↓<br>
+                                📁 File Storage
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 3: Technology Stack -->
+        <div class="slide" id="slide-3">
+            <div class="slide-content">
+                <h1 class="slide-title">Technology Stack</h1>
+                <div class="tech-stack">
+                    <div class="tech-item">
+                        <h3>🟠 Laravel</h3>
+                        <p>PHP Framework</p>
+                        <p>MVC Architecture</p>
+                    </div>
+                    <div class="tech-item">
+                        <h3>🔵 MySQL</h3>
+                        <p>Database</p>
+                        <p>Relational Data</p>
+                    </div>
+                    <div class="tech-item">
+                        <h3>🟡 HTML/CSS/JS</h3>
+                        <p>Frontend</p>
+                        <p>User Interface</p>
+                    </div>
+                    <div class="tech-item">
+                        <h3>🟢 Bootstrap</h3>
+                        <p>CSS Framework</p>
+                        <p>Responsive Design</p>
+                    </div>
+                    <div class="tech-item">
+                        <h3>🔴 Eloquent ORM</h3>
+                        <p>Database ORM</p>
+                        <p>Model Relationships</p>
+                    </div>
+                    <div class="tech-item">
+                        <h3>🟣 Blade Templates</h3>
+                        <p>Template Engine</p>
+                        <p>Dynamic Views</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 4: Key Features -->
+        <div class="slide" id="slide-4">
+            <div class="slide-content">
+                <h1 class="slide-title">Key Features</h1>
+                <div class="two-column">
+                    <div>
+                        <h2 style="color: #007bff;">For Members</h2>
+                        <ul class="feature-list">
+                            <li>🔍 Search and browse books</li>
+                            <li>📝 Request book borrowing</li>
+                            <li>📋 View lending history</li>
+                            <li>⏰ Check overdue books</li>
+                            <li>💰 View fine amounts</li>
+                            <li>👤 Manage profile</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h2 style="color: #007bff;">For Administrators</h2>
+                        <ul class="feature-list">
+                            <li>📚 Manage book catalog</li>
+                            <li>✅ Approve lending requests</li>
+                            <li>👥 Manage user accounts</li>
+                            <li>📊 View system statistics</li>
+                            <li>💰 Track fine collections</li>
+                            <li>📈 Generate reports</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 5: Database Design -->
+        <div class="slide" id="slide-5">
+            <div class="slide-content">
+                <h1 class="slide-title">Database Design</h1>
+                <div class="diagram-container">
+                    <img id="er-diagram" alt="ER Diagram" style="max-width: 100%; height: auto;">
+                </div>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-number">5</span>
+                        <span class="stat-label">Main Entities</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">4</span>
+                        <span class="stat-label">Relationships</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">Normalized</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 6: System Workflows -->
+        <div class="slide" id="slide-6">
+            <div class="slide-content">
+                <h1 class="slide-title">System Workflows</h1>
+                <div class="two-column">
+                    <div>
+                        <h2 style="color: #007bff;">Book Borrowing Process</h2>
+                        <ol style="font-size: 1.1em; line-height: 1.8;">
+                            <li>User logs in to system</li>
+                            <li>Browse or search for books</li>
+                            <li>Select desired book</li>
+                            <li>Check availability</li>
+                            <li>Submit borrow request</li>
+                            <li>Admin reviews request</li>
+                            <li>Admin approves/denies</li>
+                            <li>Book is issued to user</li>
+                        </ol>
+                    </div>
+                    <div>
+                        <h2 style="color: #007bff;">Fine Calculation</h2>
+                        <ul style="font-size: 1.1em; line-height: 1.8;">
+                            <li>System checks overdue books daily</li>
+                            <li>Calculates days overdue</li>
+                            <li>Applies ₹10 per day fine</li>
+                            <li>Updates user fine total</li>
+                            <li>Displays on user dashboard</li>
+                            <li>Admin can track collections</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 7: Security Features -->
+        <div class="slide" id="slide-7">
+            <div class="slide-content">
+                <h1 class="slide-title">Security Features</h1>
+                <div class="two-column">
+                    <div>
+                        <h2 style="color: #007bff;">Authentication & Authorization</h2>
+                        <ul class="feature-list">
+                            <li>🔐 Password hashing with bcrypt</li>
+                            <li>📧 Email verification required</li>
+                            <li>🎭 Role-based access control</li>
+                            <li>🔑 Remember me functionality</li>
+                            <li>🚪 Session management</li>
+                            <li>🛡️ CSRF protection</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h2 style="color: #007bff;">Data Protection</h2>
+                        <ul class="feature-list">
+                            <li>✅ Input validation</li>
+                            <li>🛡️ SQL injection prevention</li>
+                            <li>🚫 XSS protection</li>
+                            <li>🔒 Secure file uploads</li>
+                            <li>📝 Audit trails</li>
+                            <li>🔐 Encrypted sensitive data</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 8: Performance & Scalability -->
+        <div class="slide" id="slide-8">
+            <div class="slide-content">
+                <h1 class="slide-title">Performance & Scalability</h1>
+                <div class="two-column">
+                    <div>
+                        <h2 style="color: #007bff;">Optimization Features</h2>
+                        <ul class="feature-list">
+                            <li>⚡ Database indexing</li>
+                            <li>🔄 Query optimization</li>
+                            <li>📦 Eager loading</li>
+                            <li>💾 Caching strategies</li>
+                            <li>📱 Responsive design</li>
+                            <li>🚀 Fast page loading</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h2 style="color: #007bff;">Scalability</h2>
+                        <ul class="feature-list">
+                            <li>📈 Modular architecture</li>
+                            <li>🔧 Extensible design</li>
+                            <li>📊 Horizontal scaling ready</li>
+                            <li>🔄 Easy maintenance</li>
+                            <li>📝 Well-documented code</li>
+                            <li>🧪 Testable components</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 9: Benefits -->
+        <div class="slide" id="slide-9">
+            <div class="slide-content">
+                <h1 class="slide-title">Benefits & Advantages</h1>
+                <div class="highlight">
+                    <h2 style="color: #007bff; text-align: center;">Why Choose This System?</h2>
+                </div>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color: #28a745;">For Library Staff</h3>
+                        <ul class="feature-list">
+                            <li>⏰ Reduced manual work</li>
+                            <li>📊 Better organization</li>
+                            <li>🔍 Easy book tracking</li>
+                            <li>💰 Automated fine calculation</li>
+                            <li>📈 Detailed reports</li>
+                            <li>👥 Efficient user management</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 style="color: #28a745;">For Library Users</h3>
+                        <ul class="feature-list">
+                            <li>🔍 Easy book discovery</li>
+                            <li>📱 Access from anywhere</li>
+                            <li>📋 Transparent lending history</li>
+                            <li>⏰ Real-time availability</li>
+                            <li>💰 Clear fine tracking</li>
+                            <li>👤 Self-service features</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 10: Conclusion -->
+        <div class="slide" id="slide-10">
+            <div class="slide-content">
+                <h1 class="slide-title">Thank You!</h1>
+                <div class="highlight">
+                    <p class="slide-text" style="text-align: center; font-size: 1.5em;">
+                        🎯 Modern Library Management Solution<br>
+                        🚀 Built with Latest Technologies<br>
+                        🔒 Secure and Scalable<br>
+                        💡 Ready for Production Use
+                    </p>
+                </div>
+                <div style="text-align: center; margin-top: 40px;">
+                    <h2 style="color: #007bff;">Questions & Discussion</h2>
+                    <p class="slide-text">
+                        Ready to implement this system in your library?
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="nav-btn" onclick="previousSlide()" id="prev-btn">← Previous</button>
+            <button class="nav-btn" onclick="nextSlide()" id="next-btn">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 10;
+        
+        // Update slide counter
+        function updateCounter() {
+            document.getElementById('current-slide').textContent = currentSlide;
+            document.getElementById('total-slides').textContent = totalSlides;
+        }
+        
+        // Show slide
+        function showSlide(slideNumber) {
+            // Hide all slides
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active');
+            });
+            
+            // Show current slide
+            document.getElementById(`slide-${slideNumber}`).classList.add('active');
+            
+            // Update navigation buttons
+            document.getElementById('prev-btn').disabled = slideNumber === 1;
+            document.getElementById('next-btn').disabled = slideNumber === totalSlides;
+            
+            // Update counter
+            updateCounter();
+        }
+        
+        // Next slide
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+        
+        // Previous slide
+        function previousSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                previousSlide();
+            }
+        });
+        
+        // Load ER diagram
+        window.onload = function() {
+            const plantUmlCode = `
+@startuml Library Management System ER Diagram
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam entity {
+    BackgroundColor #F8F9FA
+    BorderColor #007BFF
+    FontColor #333333
+}
+
+title Library Management System - Entity Relationship Diagram
+
+entity "users" {
+    * id : bigint (PK)
+    --
+    name : string
+    email : string (UNIQUE)
+    password : string
+    role : string
+    created_at : timestamp
+    updated_at : timestamp
+}
+
+entity "books" {
+    * id : bigint (PK)
+    --
+    title : string
+    author : string
+    isbn : string (UNIQUE)
+    book_type_id : bigint (FK)
+    language_id : bigint (FK)
+    quantity : integer
+    created_at : timestamp
+    updated_at : timestamp
+}
+
+entity "lendings" {
+    * id : bigint (PK)
+    --
+    book_id : bigint (FK)
+    user_id : bigint (FK)
+    status : string
+    issued_at : date
+    return_at : date
+    created_at : timestamp
+    updated_at : timestamp
+}
+
+entity "book_types" {
+    * id : bigint (PK)
+    --
+    name : string
+    created_at : timestamp
+    updated_at : timestamp
+}
+
+entity "languages" {
+    * id : bigint (PK)
+    --
+    name : string
+    created_at : timestamp
+    updated_at : timestamp
+}
+
+users ||--o{ lendings : "has many"
+books ||--o{ lendings : "has many"
+book_types ||--o{ books : "has many"
+languages ||--o{ books : "has many"
+
+@enduml
+            `;
+            
+            const encoded = plantumlEncoder.encode(plantUmlCode);
+            document.getElementById('er-diagram').src = `http://www.plantuml.com/plantuml/png/${encoded}`;
+        };
+        
+        // Initialize
+        updateCounter();
+    </script>
+</body>
+</html> 

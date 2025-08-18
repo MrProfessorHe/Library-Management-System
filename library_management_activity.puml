@@ -1,0 +1,108 @@
+@startuml Library Management System Activity Diagram
+
+!theme plain
+skinparam activity {
+    BackgroundColor LightBlue
+    BorderColor DarkBlue
+    FontColor Black
+}
+skinparam activityDiamond {
+    BackgroundColor LightYellow
+    BorderColor Orange
+    FontColor Black
+}
+
+title Library Management System - Activity Diagram
+
+|Guest User|
+start
+:Visit Library Website;
+:View Available Books;
+:Search for Books;
+if (Want to Borrow?) then (yes)
+    :Register Account;
+    :Verify Email;
+    |Registered User|
+    :Login to System;
+    :Browse Books;
+    :Select Book to Borrow;
+    :Submit Borrow Request;
+    |System|
+    :Check Book Availability;
+    if (Book Available?) then (yes)
+        :Create Pending Request;
+        :Notify Admin;
+        |Admin|
+        :Review Borrow Request;
+        if (Approve Request?) then (yes)
+            :Update Book Quantity;
+            :Set Issue Date;
+            :Set Return Date;
+            :Mark Request as Approved;
+            :Notify User;
+            |Registered User|
+            :Receive Approval Notification;
+            :View Borrowed Books;
+            :Track Return Date;
+            if (Return Date Reached?) then (yes)
+                :Return Book;
+                |Admin|
+                :Update Book Quantity;
+                :Mark as Returned;
+                :Calculate Fine (if overdue);
+                |System|
+                :Update User Record;
+            else (no)
+                :Continue Using Book;
+            endif
+        else (no)
+            :Reject Request;
+            :Notify User;
+            |Registered User|
+            :Receive Rejection Notification;
+        endif
+    else (no)
+        :Show "Book Not Available";
+        |Registered User|
+        :Choose Different Book;
+    endif
+else (no)
+    :Continue Browsing;
+endif
+
+|Admin|
+:Login to Admin Panel;
+:View Dashboard;
+:Manage Books;
+fork
+    :Add New Book;
+    :Enter Book Details;
+    :Set Quantity;
+    :Save Book;
+fork again
+    :Edit Existing Book;
+    :Update Book Information;
+    :Save Changes;
+fork again
+    :Manage Lending Requests;
+    :Review Pending Requests;
+    :Approve/Reject Requests;
+fork again
+    :View System Statistics;
+    :Monitor Overdue Books;
+    :Calculate Fines;
+fork again
+    :Manage Users;
+    :View User List;
+    :Check User Activity;
+end fork
+
+|System|
+:Process Daily Tasks;
+:Check Overdue Books;
+:Calculate Fines;
+:Send Reminder Notifications;
+
+stop
+
+@enduml 

@@ -1,0 +1,79 @@
+@startuml Library Management System Use Case Diagram
+
+!theme plain
+skinparam actorStyle awesome
+skinparam usecase {
+    BackgroundColor LightBlue
+    BorderColor DarkBlue
+    ArrowColor DarkBlue
+}
+
+title Library Management System - Essential Use Cases
+
+' Actors
+actor "Guest User" as GU
+actor "Registered User" as RU
+actor "Admin" as AD
+
+' System boundary
+rectangle "Library Management System" {
+    
+    ' Authentication use cases
+    usecase "Register Account" as UC1
+    usecase "Login" as UC2
+    usecase "Logout" as UC3
+    
+    ' Book management use cases
+    usecase "View Books" as UC4
+    usecase "Search Books" as UC5
+    usecase "Add Book" as UC6
+    usecase "Edit Book" as UC7
+    
+    ' Lending management use cases
+    usecase "Request Book Borrow" as UC8
+    usecase "View My Lendings" as UC9
+    usecase "Approve/Reject Requests" as UC10
+    usecase "Track Overdue Books" as UC11
+    
+    ' Dashboard use cases
+    usecase "View User Dashboard" as UC12
+    usecase "View Admin Dashboard" as UC13
+}
+
+' Guest User relationships
+GU --> UC1
+GU --> UC2
+GU --> UC4
+GU --> UC5
+
+' Registered User relationships
+RU --> UC3
+RU --> UC4
+RU --> UC5
+RU --> UC8
+RU --> UC9
+RU --> UC12
+
+' Admin relationships
+AD --> UC3
+AD --> UC4
+AD --> UC5
+AD --> UC6
+AD --> UC7
+AD --> UC10
+AD --> UC11
+AD --> UC13
+
+' Include relationships
+UC13 ..> UC11 : <<include>>
+UC10 ..> UC11 : <<include>>
+
+' Extend relationships
+UC8 ..> UC9 : <<extend>>
+
+' Notes
+note right of UC13 : Shows system overview\nand statistics
+note right of UC12 : Shows user's current\nlendings and overdue books
+note right of UC11 : Tracks overdue books\nand calculates fines
+
+@enduml 
