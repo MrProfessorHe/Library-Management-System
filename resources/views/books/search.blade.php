@@ -116,22 +116,31 @@
                                 $image = $volume['imageLinks']['thumbnail'] ?? 'https://dummyimage.com/150x200/cccccc/000000&text=No+Image';
                                 $title = $volume['title'] ?? 'No title';
                                 $authors = implode(', ', $volume['authors'] ?? ['Unknown Author']);
+
+                                // Extract ISBN_13 or ISBN_10 if available
+                                $isbn = collect($volume['industryIdentifiers'] ?? [])->firstWhere('type', 'ISBN_13')['identifier']
+                                    ?? collect($volume['industryIdentifiers'] ?? [])->firstWhere('type', 'ISBN_10')['identifier']
+                                    ?? null;
                             @endphp
-                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                                <a href="/books/{{ $item['id'] ?? 'external' }}" class="block p-4">
-                                    <div class="aspect-[3/4] mb-3 overflow-hidden rounded-md">
-                                        <img src="{{ $image }}" 
-                                            class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                                            alt="{{ $title }}" />
-                                    </div>
-                                    <h3 class="font-semibold text-gray-900 dark:text-white text-sm mb-1 line-clamp-2">
-                                        {{ $title }}
-                                    </h3>
-                                    <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
-                                        {{ $authors }}
-                                    </p>
-                                </a>
-                            </div>
+
+                            @if($isbn)
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                                    <a href="{{ route('books.external.show', ['isbn' => $isbn]) }}" class="block p-4">
+                                        <div class="aspect-[3/4] mb-3 overflow-hidden rounded-md">
+                                            <img src="{{ $image }}" 
+                                                class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                                                alt="{{ $title }}" />
+                                        </div>
+                                        <h3 class="font-semibold text-gray-900 dark:text-white text-sm mb-1 line-clamp-2">
+                                            {{ $title }}
+                                        </h3>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
+                                            {{ $authors }}
+                                        </p>
+                                    </a>
+                                </div>
+                            @endif
+
                         @endforeach
                     </div>
                 </div>

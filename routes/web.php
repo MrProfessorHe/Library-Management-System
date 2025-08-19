@@ -35,6 +35,7 @@ Route::get('/admin/users/{user}/fines', [FineManagementController::class, 'userF
 Route::put('/lendings/{lending}/return', [LendingManagementController::class, 'markAsReturned'])->name('lendings.return');
 
 
+// External book details (must be before resource!)
 Route::get('/books/external/{isbn}/{id?}', [BookController::class, 'showExternal'])->name('books.external.show');
 
 //admin login
