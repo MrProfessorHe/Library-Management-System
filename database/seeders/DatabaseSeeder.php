@@ -21,15 +21,15 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         //add books
-        // $this->call([
-        //     BookSeeder::class,
-        //     FineRuleSeeder::class,
-        // ]);
+        $this->call([
+            BookSeeder::class,
+            // FineRuleSeeder::class,
+        ]);
 
         //fine and fine rule Seeder
-        $this->call([
-            FineRuleSeeder::class,
-            FineSeeder::class,
-        ]);
+        // $this->call([
+        //     FineRuleSeeder::class,
+        //     FineSeeder::class,
+        // ]);
     }
 }
