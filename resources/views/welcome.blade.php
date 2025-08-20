@@ -49,7 +49,9 @@
                         ['title' => 'Trending Books', 'data' => $trendingBooks, 'id' => 'trending-books', 'external' => true],
                         ['title' => 'Comics & Graphic Novels', 'data' => $comics, 'id' => 'comics-book'],
                         ['title' => 'Action & Adventure', 'data' => $action, 'id' => 'action-book'],
-                        ['title' => 'Fiction Books', 'data' => $fiction, 'id' => 'fiction-book']
+                        ['title' => 'Fiction Books', 'data' => $fiction, 'id' => 'fiction-book'],
+                        ['title' => 'Horror Books', 'data' => $horror, 'id' => 'horror-book']
+
                     ];
                 @endphp
 

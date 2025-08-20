@@ -12,9 +12,11 @@ class WelcomeController extends Controller
 {
     public function index()
     {
-        $fiction = Book::where('book_type_id', 18)->latest()->take(20)->get();
-        $action = Book::where('book_type_id', 1)->latest()->take(20)->get();
-        $comics = Book::where('book_type_id', 10)->latest()->take(20)->get();
+        $fiction = Book::where('book_type_id', 18)->latest()->take(30)->get();
+        $action = Book::where('book_type_id', 1)->latest()->take(30)->get();
+        $comics = Book::where('book_type_id', 10)->latest()->take(30)->get();
+        $horror = Book::where('book_type_id', 22)->latest()->take(30)->get();
+
 
         $trendingBooks = Cache::remember('trending_books', now()->addHours(6), function () {
             $nytApiKey = env('NYT_API_KEY');
@@ -56,6 +58,6 @@ class WelcomeController extends Controller
             return $books;
         });
 
-        return view('welcome', compact('fiction', 'action', 'comics', 'trendingBooks'));
+        return view('welcome', compact('fiction', 'action', 'comics', 'trendingBooks','horror'));
     }
 }
