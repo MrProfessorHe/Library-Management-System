@@ -16,7 +16,9 @@
 ---
 
 ## 🚀 About the Project
+
 The **Library Management System** is a Laravel-based web application that helps manage:
+
 - 📖 Books (internal & external via Google Books API)
 - 👩‍💻 Users (Admin, Librarian, Members)
 - 🔄 Lending requests, approvals & rejections
@@ -28,14 +30,13 @@ This system is designed for **schools, colleges, or public libraries** to simpli
 ---
 
 ## ⚡ Features
+
 - User authentication (Admin, Librarian, Member)
 - Search books (internal DB + Google Books API)
 - Borrowing & lending system with approval/rejection
 - Track overdue books & fines
 - Role-based access control
 - Admin management for users, books & fines
-
-...existing code...
 
 ---
 
@@ -83,8 +84,10 @@ Example `.env` settings:
 ```
 DB_DATABASE=library_db
 DB_USERNAME=root
+DB_PASSWORD=
+```
 
-
+---
 
 ## ⚙️ Configuration
 
@@ -99,6 +102,7 @@ DB_USERNAME=root
 ## 👤 User Roles
 
 - **Admin:** Full access to all features
+- **Librarian:** Manage books, lendings, and fines
 - **Member:** Browse, borrow, and return books
 
 ---
