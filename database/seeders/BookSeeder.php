@@ -79,8 +79,8 @@ class BookSeeder extends Seeder
                     'title' => $info['title'] ?? $searchTitle,
                     'author' => isset($info['authors']) ? implode(', ', $info['authors']) : 'Unknown',
                     'isbn' => $isbn,
-                    'book_type_id' => 22, // Assuming 14 is the ID for 'Book'
-                    'language_id' => 6,
+                    'book_type_id' => 22, // Book Type
+                    'language_id' => 6, //language
                     'quantity' => rand(1, 25),
                     'cover_image' => $info['imageLinks']['thumbnail'] ?? null,
                     'created_at' => now(),
