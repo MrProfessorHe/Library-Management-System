@@ -35,6 +35,8 @@ This system is designed for **schools, colleges, or public libraries** to simpli
 - Role-based access control
 - Admin management for users, books & fines
 
+...existing code...
+
 ---
 
 ## 🛠️ Installation Guide
@@ -43,7 +45,7 @@ Follow these steps to install the project:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/library-management-system.git
+git clone https://github.com/MrProfessorHe/Library-Management-System
 
 # 2. Navigate into the project folder
 cd library-management-system
@@ -63,3 +65,61 @@ php artisan migrate --seed
 
 # 7. Start the local development server
 php artisan serve
+```
+
+---
+
+## 🗄️ Importing `library_db.sql` using phpMyAdmin
+
+1. **Open phpMyAdmin** in your browser (usually at `http://localhost/phpmyadmin`).
+2. **Create a new database** (e.g., `library_db`).
+3. Click on the new database in the left sidebar.
+4. Go to the **Import** tab at the top.
+5. Click **Choose File** and select the `library_db.sql` file from your project directory.
+6. Click **Go** to import the database structure and data.
+7. Update your `.env` file with the correct database name, username, and password.
+
+Example `.env` settings:
+```
+DB_DATABASE=library_db
+DB_USERNAME=root
+
+
+
+## ⚙️ Configuration
+
+- Set your database credentials in `.env`
+- (Optional) Add API keys for Google Books in `.env`:
+  ```
+  GOOGLE_BOOKS_API_KEY=your_google_books_api_key
+  ```
+
+---
+
+## 👤 User Roles
+
+- **Admin:** Full access to all features
+- **Member:** Browse, borrow, and return books
+
+---
+
+## 📂 Project Structure
+
+- `app/` - Application logic (Controllers, Models, etc.)
+- `resources/views/` - Blade templates for UI
+- `routes/` - Route definitions
+- `database/migrations/` - Database schema
+- `database/seeders/` - Initial data
+- `public/` - Public assets and entry point
+
+---
+
+## 📄 License
+
+This project is open-source and available under the [MIT license](LICENSE).
+
+---
+
+## 🙏 Credits
+
+Built with [Laravel](https://laravel.com/), [Tailwind CSS](https://tailwindcss.com/), and [MySQL](https://www.mysql.com/)
