@@ -102,7 +102,6 @@ DB_PASSWORD=
 ## 👤 User Roles
 
 - **Admin:** Full access to all features
-- **Librarian:** Manage books, lendings, and fines
 - **Member:** Browse, borrow, and return books
 
 ---
