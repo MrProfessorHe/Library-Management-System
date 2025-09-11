@@ -9,7 +9,7 @@
             <!-- Hero Section -->
             <div class="text-center mb-14">
                 <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-gray-100 mb-4">
-                    Welcome to Our Library
+                    Welcome to Oakwood Library
                 </h1>
                 <p class="text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-3xl mx-auto">
                     Discover thousands of books — from timeless classics to modern bestsellers.
