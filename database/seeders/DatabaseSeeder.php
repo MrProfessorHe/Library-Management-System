@@ -22,8 +22,8 @@ class DatabaseSeeder extends Seeder
 
         //add books
         $this->call([
-            BookSeeder::class,
-            // FineRuleSeeder::class,
+            // BookSeeder::class,
+            FineRuleSeeder::class,
         ]);
 
         //fine and fine rule Seeder

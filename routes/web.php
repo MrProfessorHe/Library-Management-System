@@ -26,6 +26,8 @@ Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.e
 Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
 
 Route::get('/admin/lendings', [App\Http\Controllers\Admin\LendingManagementController::class, 'index'])->name('admin.lendings.index');
+Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
+
 
 // View Fines for a User
 Route::get('/admin/users/{user}/fines', [UserManagementController::class, 'showFines'])->name('admin.users.fines');

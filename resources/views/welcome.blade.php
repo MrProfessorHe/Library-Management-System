@@ -17,7 +17,7 @@
                 </p>
 
                 <!-- Search Form -->
-                <form method="GET" action="{{ route('books.search') }}" class="max-w-2xl mx-auto">
+                <form method="GET" action="{{ route('books.search') }}" cx`lass="max-w-2xl mx-auto">
                     <div class="relative">
                         <input type="text" name="search" value="{{ request('search') }}"
                             placeholder="Search for books, authors, or genres..."
@@ -50,7 +50,8 @@
                         ['title' => 'Comics & Graphic Novels', 'data' => $comics, 'id' => 'comics-book'],
                         ['title' => 'Action & Adventure', 'data' => $action, 'id' => 'action-book'],
                         ['title' => 'Fiction Books', 'data' => $fiction, 'id' => 'fiction-book'],
-                        ['title' => 'Horror Books', 'data' => $horror, 'id' => 'horror-book']
+                        ['title' => 'Horror Books', 'data' => $horror, 'id' => 'horror-book'],
+                        ['title' => 'Thriller Books', 'data' => $thriller, 'id' => 'thriller-book']
 
                     ];
                 @endphp

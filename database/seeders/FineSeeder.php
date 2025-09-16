@@ -16,8 +16,8 @@ class FineSeeder extends Seeder
     public function run(): void
     {
         // Get any existing users and lendings (for testing)
-        $users = User::take(3)->get(); // Take 3 users
-        $lendings = Lending::take(3)->get(); // Take 3 lendings
+        $users = User::all();
+        $lendings = Lending::all();
 
         // Loop and assign dummy fines
         foreach ($users as $index => $user) {

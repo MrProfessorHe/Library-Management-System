@@ -13,38 +13,45 @@ class BookSeeder extends Seeder
     {
         $titles = [
 
-    'Dracula',
-    'Frankenstein',
-    'The Haunting of Hill House',
-    'The Exorcist',
-    'Pet Sematary',
-    'The Shining',
-    'It',
-    'Carrie',
-    'Salem\'s Lot',
-    'Misery',
-    'Hell House',
-    'I Am Legend',
-    'Psycho',
-    'The Silence of the Lambs',
-    'The Amityville Horror',
-    'Something Wicked This Way Comes',
-    'Ghost Story',
-    'The Hellbound Heart',
-    'Books of Blood',
-    'The Girl Next Door',
-    'The Troop',
-    'The Ritual',
-    'Mexican Gothic',
-    'The Fisherman',
-    'The Only Good Indians',
-    'Bird Box',
-    'House of Leaves',
-    'Haunted',
-    'The Cabin at the End of the World',
-    'We Have Always Lived in the Castle'
+            'The Da Vinci Code',
+            'Angels & Demons',
+            'Inferno',
+            'Origin',
+            'Digital Fortress',
+            'The Bourne Identity',
+            'The Bourne Supremacy',
+            'The Bourne Ultimatum',
+            'The Silence of the White City',
+            'The Reversal',
+            'The Lincoln Lawyer',
+            'The Brass Verdict',
+            'Along Came a Spider',
+            'Kiss the Girls',
+            'Jack & Jill',
+            'The Girl with the Dragon Tattoo',
+            'The Girl Who Played with Fire',
+            'The Girl Who Kicked the Hornet\'s Nest',
+            'The Snowman',
+            'Phantom',
+            'Knife',
+            'The Surgeon',
+            'The Apprentice',
+            'The Sinner',
+            'Vanished',
+            'The Couple Next Door',
+            'A Stranger in the House',
+            'Not a Happy Family',
+            'The Last Mrs. Parrish',
+            'The Wife Between Us',
+            'Behind Closed Doors',
+            'The Breakdown',
+            'Lock Every Door',
+            'Home Before Dark',
+            'Final Girls',
+            'Survive the Night'
 
-];
+
+        ];
 
 
         $insertData = [];
@@ -61,7 +68,7 @@ class BookSeeder extends Seeder
 
                 // ✅ Only accept ISBN_13
                 $isbn = collect($info['industryIdentifiers'] ?? [])
-                            ->firstWhere('type', 'ISBN_13')['identifier'] ?? null;
+                    ->firstWhere('type', 'ISBN_13')['identifier'] ?? null;
 
                 if (!$isbn) {
                     Log::warning('Skipped book due to missing ISBN_13', ['title' => $info['title'] ?? $searchTitle]);
@@ -79,7 +86,7 @@ class BookSeeder extends Seeder
                     'title' => $info['title'] ?? $searchTitle,
                     'author' => isset($info['authors']) ? implode(', ', $info['authors']) : 'Unknown',
                     'isbn' => $isbn,
-                    'book_type_id' => 22, // Book Type
+                    'book_type_id' => 48, // Book Type
                     'language_id' => 6, //language
                     'quantity' => rand(1, 25),
                     'cover_image' => $info['imageLinks']['thumbnail'] ?? null,
