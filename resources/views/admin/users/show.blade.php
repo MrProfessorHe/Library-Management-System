@@ -81,7 +81,7 @@
             {{-- Back Button --}}
             <div class="mt-10">
                 <a href="{{ route('admin.users.index') }}" 
-                   class="inline-block bg-gray-800 hover:bg-gray-900 text-white px-8 py-3 rounded-xl shadow-lg transition font-semibold tracking-wide">
+                   class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl shadow-lg transition font-semibold tracking-wide">
                     ← Back to User Management
                 </a>
             </div>
