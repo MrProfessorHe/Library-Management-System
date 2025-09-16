@@ -19,28 +19,40 @@ class LendingManagementController extends Controller
         $this->middleware('role:admin,librarian');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $pendingLendings = Lending::with(['user', 'book'])
-            ->pending()
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+        $search = $request->input('search');
 
-        $approvedLendings = Lending::with(['user', 'book'])
+        $query = Lending::with(['user', 'book']);
+
+        if ($search) {
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
+        }
+
+        $pendingLendings = (clone $query)
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $approvedLendings = (clone $query)
             ->where('status', 'approved')
             ->whereNull('returned_at')
             ->orderBy('return_at', 'asc')
-            ->paginate(15);
+            ->get();
 
-        $overdueLendings = Lending::with(['user', 'book'])
-            ->overdue()
+        $overdueLendings = (clone $query)
+            ->where('status', 'approved')
+            ->whereNull('returned_at')
+            ->whereDate('return_at', '<', now())
             ->orderBy('return_at', 'asc')
-            ->paginate(15);
+            ->get();
 
-        $returnedLendings = Lending::with(['user', 'book'])
-            ->whereNotNull('returned_at')
+        $returnedLendings = (clone $query)
+            ->where('status', 'returned')
             ->orderBy('returned_at', 'desc')
-            ->paginate(15);
+            ->get();
 
         return view('admin.lendings.index', compact(
             'pendingLendings',
@@ -49,6 +61,7 @@ class LendingManagementController extends Controller
             'returnedLendings'
         ));
     }
+
 
 
 
