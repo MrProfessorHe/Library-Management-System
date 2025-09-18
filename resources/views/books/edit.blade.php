@@ -14,7 +14,7 @@
                 <div>
                     <label for="title" class="block mb-2 text-sm font-semibold">Title</label>
                     <input type="text" name="title" id="title" value="{{ $book->title }}"
-                        class="w-full p-3 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none"
+                        class="autocomplete=off w-full p-3 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none"
                         required>
                 </div>
 
@@ -22,7 +22,7 @@
                 <div>
                     <label for="author" class="block mb-2 text-sm font-semibold">Author</label>
                     <input type="text" name="author" id="author" value="{{ $book->author }}"
-                        class="w-full p-3 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none"
+                        class="autocomplete=off w-full p-3 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none"
                         required>
                 </div>
 
@@ -30,7 +30,7 @@
                 <div>
                     <label for="isbn" class="block mb-2 text-sm font-semibold">ISBN</label>
                     <input type="text" name="isbn" id="isbn" value="{{ $book->isbn }}"
-                        class="w-full p-3 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none"
+                        class="autocomplete=off w-full p-3 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none"
                         required>
                 </div>
 
@@ -38,7 +38,7 @@
                 <div>
                     <label for="quantity" class="block mb-2 text-sm font-semibold">Quantity</label>
                     <input type="number" name="quantity" id="quantity" value="{{ $book->quantity }}"
-                        class="w-full p-3 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none"
+                        class="autocomplete=off autocomplete=off w-full p-3 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none"
                         required>
                 </div>
 

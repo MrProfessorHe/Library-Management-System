@@ -15,7 +15,7 @@
                 <div class="flex flex-wrap gap-4 items-center">
                     <input type="text" name="search" value="{{ request('search') }}"
                         placeholder="🔍 Search by name or email"
-                        class="w-full sm:w-64 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
+                        class="autocomplete=off w-full sm:w-64 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
 
                     <select name="filter"
                         class="w-full sm:w-64 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition">

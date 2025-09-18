@@ -13,13 +13,13 @@
         <div class="mb-4">
             <label class="block mb-1 font-semibold">Name</label>
             <input type="text" name="name" value="{{ $user->name }}" required
-                class="w-full px-4 py-2 border rounded-md dark:bg-gray-900 dark:text-white">
+                class="autocomplete=off w-full px-4 py-2 border rounded-md dark:bg-gray-900 dark:text-white">
         </div>
 
         <div class="mb-4">
             <label class="block mb-1 font-semibold">Email</label>
             <input type="email" name="email" value="{{ $user->email }}" required
-                class="w-full px-4 py-2 border rounded-md dark:bg-gray-900 dark:text-white">
+                class="autocomplete=off w-full px-4 py-2 border rounded-md dark:bg-gray-900 dark:text-white">
         </div>
 
         <div class="mb-4">

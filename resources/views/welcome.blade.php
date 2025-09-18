@@ -17,19 +17,26 @@
                 </p>
 
                 <!-- Search Form -->
-                <form method="GET" action="{{ route('books.search') }}" cx`lass="max-w-2xl mx-auto">
-                    <div class="relative">
-                        <input type="text" name="search" value="{{ request('search') }}"
-                            placeholder="Search for books, authors, or genres..."
-                            class="w-full pl-14 pr-36 py-4 text-lg rounded-2xl border-2 border-blue-300 dark:border-blue-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition duration-200 shadow-md">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                            <svg class="w-6 h-6 text-blue-500 dark:text-blue-300" fill="none" viewBox="0 0 20 20">
+                <form method="GET" action="{{ route('books.search') }}" autocomplete="off" class="max-w-2xl mx-auto">
+                    <div
+                        class="flex items-center bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-2xl shadow-md focus-within:ring-4 focus-within:ring-blue-500/20 transition duration-200">
+
+                        <!-- Search icon -->
+                        <div class="pl-4 text-blue-500 dark:text-blue-300">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 20 20">
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
                             </svg>
                         </div>
+
+                        <!-- Input -->
+                        <input type="text" name="search" value="{{ request('search') }}"
+                            placeholder="Search for books, authors, or genres..."
+                            class="autocomplete=off flex-1 py-4 px-3 text-lg bg-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-0 border-l-0 border-r-0 focus:outline-none focus:ring-0" />
+
+                        <!-- Button -->
                         <button type="submit"
-                            class="absolute right-3 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl transition duration-200 shadow-md flex items-center gap-2">
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 m-2 rounded-xl transition duration-200 shadow-md flex items-center gap-2">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 20 20">
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
@@ -37,7 +44,18 @@
                             Search
                         </button>
                     </div>
+                    @if(session()->has('error'))
+                        <div class="max-w-2xl mx-auto mb-4">
+                            <div id="error-box"
+                                class="max-w-7xl mx-auto mt-8 p-4 bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800 rounded-lg shadow-sm">
+                                {{ session('error') }}
+                            </div>
+                        </div>
+                    @endif
+
+
                 </form>
+
             </div>
 
             <!-- Book Categories -->
@@ -130,3 +148,18 @@
         }
     </script>
 @endsection
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let errorBox = document.getElementById("error-box");
+        if (errorBox) {
+            setTimeout(() => {
+                errorBox.classList.add("opacity-0", "-translate-y-4"); // fade + slide up
+            }, 3000); // start after 3s
+
+            setTimeout(() => {
+                errorBox.style.display = "none"; // fully remove after transition
+            }, 3800); // matches duration
+        }
+    });
+</script>

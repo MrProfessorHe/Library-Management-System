@@ -56,36 +56,45 @@ class BookController extends Controller
         return view('books.show', compact('book', 'localBook'));
     }
 
-
-
-
-
-
     public function search(Request $request)
     {
-        $query = $request->input('search');
+        $query = trim($request->input('search'));
 
-        // Search from DB
+        // ✅ Prevent empty searches
+        if (empty($query)) {
+            return redirect()->back()->with('error', 'Please enter a search term.');
+        }
+
+        // 🔎 Search from DB
         $localBooks = Book::where('title', 'like', "%{$query}%")
             ->orWhere('author', 'like', "%{$query}%")
             ->get();
 
-        // Search from Google Books API
+        // 🔎 Search from Google Books API
         $apiBooks = [];
-        if ($query) {
-            $response = Http::get('https://www.googleapis.com/books/v1/volumes', [
-                'q' => $query,
-                'key' => env('GOOGLE_BOOKS_API_KEY'),
-                'maxResults' => 10
-            ]);
+        $response = Http::get('https://www.googleapis.com/books/v1/volumes', [
+            'q' => $query,
+            'key' => env('GOOGLE_BOOKS_API_KEY'),
+            'maxResults' => 10
+        ]);
 
-            if ($response->successful()) {
-                $apiBooks = $response->json('items') ?? [];
-            }
+        if ($response->successful()) {
+            $apiBooksRaw = $response->json('items') ?? [];
+
+            // Only books with ISBN
+            $apiBooks = collect($apiBooksRaw)->filter(function ($item) {
+                $volume = $item['volumeInfo'] ?? [];
+                $isbn = collect($volume['industryIdentifiers'] ?? [])->firstWhere('type', 'ISBN_13')['identifier']
+                    ?? collect($volume['industryIdentifiers'] ?? [])->firstWhere('type', 'ISBN_10')['identifier']
+                    ?? null;
+
+                return $isbn !== null;
+            })->values();
         }
 
         return view('books.search', compact('query', 'localBooks', 'apiBooks'));
     }
+
 
 
     public function create()

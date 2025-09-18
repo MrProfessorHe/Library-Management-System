@@ -40,7 +40,7 @@
                             <div class="flex flex-col">
                                 <label for="{{ $id }}-modal" class="mb-2 text-base font-semibold">{{ $label }}</label>
                                 <input type="{{ $type }}" name="{{ $id }}" id="{{ $id }}-modal"
-                                    class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 text-base rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-4"
+                                    class="autocomplete=off bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 text-base rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-4"
                                     placeholder="{{ $placeholder }}" required />
                             </div>
                         @endforeach
@@ -88,7 +88,7 @@
     <div class="relative w-full md:w-1/3">
         <input type="text" id="table-search" name="search"
             value="{{ request('search') }}"
-            class="block pt-2 ps-10 text-lg text-gray-800 dark:text-gray-100 border border-blue-300 dark:border-blue-600 rounded-lg w-full bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-300 focus:ring-blue-500 focus:border-blue-500 transition"
+            class="autocomplete=off block pt-2 ps-10 text-lg text-gray-800 dark:text-gray-100 border border-blue-300 dark:border-blue-600 rounded-lg w-full bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-300 focus:ring-blue-500 focus:border-blue-500 transition"
             placeholder="Search for books...">
         <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
             <svg class="w-5 h-5 text-blue-500 dark:text-blue-300" fill="none" viewBox="0 0 20 20">

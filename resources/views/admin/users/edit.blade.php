@@ -14,7 +14,7 @@
         <div class="mb-6">
             <label for="name" class="block mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Name</label>
             <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none
+                class="autocomplete=off w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none
                        bg-white text-gray-900 dark:bg-gray-900 dark:text-white dark:border-gray-600 dark:focus:ring-indigo-400" 
                 placeholder="Enter full name" required>
             @error('name')
@@ -26,7 +26,7 @@
         <div class="mb-6">
             <label for="email" class="block mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Email</label>
             <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none
+                class="autocomplete=off w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none
                        bg-white text-gray-900 dark:bg-gray-900 dark:text-white dark:border-gray-600 dark:focus:ring-indigo-400" 
                 placeholder="Enter email address" required>
             @error('email')
@@ -38,7 +38,7 @@
         <div class="mb-6">
             <label for="phone" class="block mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Phone Number</label>
             <input type="tel" name="phone" id="phone" value="{{ old('phone', $user->phone) }}"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none
+                class="autocomplete=off w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none
                        bg-white text-gray-900 dark:bg-gray-900 dark:text-white dark:border-gray-600 dark:focus:ring-indigo-400" 
                 placeholder="Enter phone number">
             @error('phone')

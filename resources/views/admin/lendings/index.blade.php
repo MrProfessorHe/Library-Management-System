@@ -12,7 +12,7 @@
     <form method="GET" action="{{ route('admin.lendings.index') }}" class="mb-8 max-w-lg">
         <div class="flex gap-2 flex-wrap">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by user name"
-                   class="flex-grow px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                   class="autocomplete=off flex-grow px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
             <button type="submit"
                     class="bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-400 text-white px-6 rounded-lg shadow font-semibold transition">
                 Search
