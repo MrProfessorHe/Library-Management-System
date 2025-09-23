@@ -50,6 +50,29 @@ class ProfileController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
+
+    public function show(Request $request)
+    {
+        $user = $request->user();
+
+        // Total books borrowed by user
+        $booksBorrowedCount = \App\Models\Lending::where('user_id', $user->id)->count();
+
+        // Active rentals (currently borrowed)
+        $activeRentalsCount = \App\Models\Lending::where('user_id', $user->id)
+            ->whereNull('return_at')
+            ->count();
+
+        // Wishlist items (make sure User model has wishlist() relationship)
+
+        return view('profile.show', [
+            'user' => $user,
+            'booksBorrowedCount' => $booksBorrowedCount,
+            'activeRentalsCount' => $activeRentalsCount,
+        ]);
+    }
+
+
     public function destroy(Request $request): RedirectResponse
     {
         $request->validateWithBag('userDeletion', [

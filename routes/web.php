@@ -15,6 +15,15 @@ use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Admin\FineReceiptController;
 
 
+// Show profile page
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/profile/show', [ProfileController::class, 'show'])->name('profile.show');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
 Route::get('/', [WelcomeController::class, 'index'])->name('home');
 // Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
@@ -66,19 +75,10 @@ Route::get('/user-list', [UserController::class, 'index'])->middleware(['auth'])
 Route::get('/search', [BookController::class, 'search'])->name('books.search');
 
 
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-
 Route::middleware(['auth'])->group(function () {
     Route::post('/lendings/request/{book}', [LendingManagementController::class, 'requestBorrow'])->name('lendings.request');
     Route::post('/lendings/{lending}/approve', [LendingManagementController::class, 'approve'])->name('lendings.approve');
     Route::post('/lendings/{lending}/reject', [LendingManagementController::class, 'reject'])->name('lendings.reject');
-
 });
 
 // Admin Routes
@@ -96,7 +96,7 @@ Route::middleware(['auth', 'role:admin,librarian'])->prefix('admin')->name('admi
     // Lending Management
     Route::get('/lendings', [App\Http\Controllers\Admin\LendingManagementController::class, 'index'])->name('lendings.index');
     Route::get('/lendings/{lending}', [App\Http\Controllers\Admin\LendingManagementController::class, 'show'])->name('lendings.show');
-    
+
     Route::post('/lendings/{lending}/approve', [App\Http\Controllers\Admin\LendingManagementController::class, 'approve'])->name('lendings.approve');
     Route::post('/lendings/{lending}/reject', [App\Http\Controllers\Admin\LendingManagementController::class, 'reject'])->name('lendings.reject');
     Route::post('/lendings/{lending}/return', [App\Http\Controllers\Admin\LendingManagementController::class, 'markAsReturned'])->name('lendings.return');
@@ -119,11 +119,9 @@ Route::middleware(['auth', 'role:admin,librarian'])->prefix('admin')->name('admi
     Route::post('/fines/calculate-all', [App\Http\Controllers\Admin\FineManagementController::class, 'calculateAllFines'])->name('fines.calculate-all');
     Route::get('/fines/report', [App\Http\Controllers\Admin\FineManagementController::class, 'report'])->name('fines.report');
     Route::post('/fines/{fine}/mark-paid', [FineManagementController::class, 'markAsPaid'])->name('admin.fines.markPaid');
-    
-
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
 
 // Show edit form
 Route::get('/books/{id}/edit', [BookController::class, 'edit'])->name('books.edit');
@@ -134,6 +132,3 @@ Route::put('/books/{id}', [BookController::class, 'update'])->name('books.update
 Route::get('/books', [BookController::class, 'index'])->name('books.insertBook');
 
 Route::get('/books/live-search', [BookController::class, 'liveSearch'])->name('books.liveSearch');
-
-
-

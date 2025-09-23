@@ -15,43 +15,47 @@
     <div class="w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <!-- Left section: Logo & Nav -->
-            <div class="flex items-center space-x-6">
-                <!-- Logo -->
-                <a href="{{ route('home') }}"
-                    class="flex items-center hover:opacity-90 transition-opacity duration-200">
-                    <img src="{{ asset('images/BookLogoB.png') }}" alt="Library Logo" class="h-10 block dark:hidden">
-                    <img src="{{ asset('images/BookLogoW.png') }}" alt="Library Logo" class="h-10 hidden dark:block">
-                </a>
+            <!-- Left section: Logo & Heading -->
+<div class="flex items-center space-x-6">
+    <!-- Logo + Heading together -->
+    <a href="{{ route('home') }}" class="flex items-center space-x-3 hover:opacity-90 transition-opacity duration-200">
+        <img src="{{ asset('images/BookLogoB.png') }}" alt="Library Logo" class="h-10 block dark:hidden">
+        <img src="{{ asset('images/BookLogoW.png') }}" alt="Library Logo" class="h-10 hidden dark:block">
+        <span class="text-lg font-bold text-gray-800 dark:text-gray-100 tracking-wide">
+            Oakwood Library
+        </span>
+    </a>
 
-                <!-- Nav links -->
-                <div class="hidden sm:flex space-x-6 items-center text-sm font-medium text-gray-600 dark:text-gray-300">
-                    <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
-                        {{ __('Home') }}
-                    </x-nav-link>
+    <!-- Nav links -->
+    <div class="hidden sm:flex space-x-6 items-center text-sm font-medium text-gray-600 dark:text-gray-300">
+        <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
+            {{ __('Home') }}
+        </x-nav-link>
 
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
+        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+            {{ __('Dashboard') }}
+        </x-nav-link>
 
-                    @if(auth()->user() && (auth()->user()->role === 'admin' || auth()->user()->role === 'librarian'))
-                        <x-nav-link :href="route('books.insertBook')" :active="request()->routeIs('books.insertBook', 'books.edit', 'books.update', 'books.create')">
-                            {{ __('Manage Books') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.lendings.index')" :active="request()->routeIs('admin.lendings.*')">
-                            {{ __('Manage Lendings') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.fines.index')" :active="request()->routeIs('admin.fines.*')">
-                            {{ __('Manage Fines') }}
-                        </x-nav-link>
-                    @endif
+        @if(auth()->user() && (auth()->user()->role === 'admin' || auth()->user()->role === 'librarian'))
+            <x-nav-link :href="route('books.insertBook')" :active="request()->routeIs('books.insertBook', 'books.edit', 'books.update', 'books.create')">
+                {{ __('Manage Books') }}
+            </x-nav-link>
+            <x-nav-link :href="route('admin.lendings.index')" :active="request()->routeIs('admin.lendings.*')">
+                {{ __('Manage Lendings') }}
+            </x-nav-link>
+            <x-nav-link :href="route('admin.fines.index')" :active="request()->routeIs('admin.fines.*')">
+                {{ __('Manage Fines') }}
+            </x-nav-link>
+        @endif
 
-                    @if(auth()->user() && auth()->user()->role === 'admin')
-                        <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
-                            {{ __('User Management') }}
-                        </x-nav-link>
-                    @endif
-                </div>
-            </div>
+        @if(auth()->user() && auth()->user()->role === 'admin')
+            <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                {{ __('User Management') }}
+            </x-nav-link>
+        @endif
+    </div>
+</div>
+
 
             <!-- Right section: Auth/User -->
             <div class="hidden sm:flex items-center space-x-4">
@@ -67,9 +71,9 @@
                             </button>
                         </x-slot>
                         <x-slot name="content">
-                            <x-dropdown-link :href="route('profile.edit')">
-                                {{ __('Profile') }}
-                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('profile.show')">
+    {{ __('Profile') }}
+</x-dropdown-link>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <x-dropdown-link :href="route('logout')"
@@ -131,9 +135,9 @@
         @endif
 
         @auth
-            <x-responsive-nav-link :href="route('profile.edit')">
-                {{ __('Profile') }}
-            </x-responsive-nav-link>
+<x-responsive-nav-link :href="route('profile.show')">
+    {{ __('Profile') }}
+</x-responsive-nav-link>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <x-responsive-nav-link :href="route('logout')"
