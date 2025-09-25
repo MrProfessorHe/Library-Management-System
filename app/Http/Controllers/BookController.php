@@ -56,45 +56,81 @@ class BookController extends Controller
         return view('books.show', compact('book', 'localBook'));
     }
 
-    public function search(Request $request)
-    {
-        $query = trim($request->input('search'));
+public function search(Request $request)
+{
+    $query = trim($request->input('search'));
+    $category = $request->query('category'); // 👈 catch category from View All links
 
-        // ✅ Prevent empty searches
-        if (empty($query)) {
-            return redirect()->back()->with('error', 'Please enter a search term.');
+    // If "View All" category is clicked
+    if ($category) {
+        switch ($category) {
+            case 'fiction-books':
+                $localBooks = Book::where('book_type_id', 18)->latest()->paginate(20);
+                break;
+
+            case 'action-books':
+                $localBooks = Book::where('book_type_id', 1)->latest()->paginate(20);
+                break;
+
+            case 'comics-books':
+                $localBooks = Book::where('book_type_id', 10)->latest()->paginate(20);
+                break;
+
+            case 'horror-books':
+                $localBooks = Book::where('book_type_id', 22)->latest()->paginate(20);
+                break;
+
+            case 'thriller-books':
+                $localBooks = Book::where('book_type_id', 48)->latest()->paginate(20);
+                break;
+
+            case 'trending-books':
+                // 🔎 For trending, you can either refetch from API or pass from cache (like WelcomeController)
+                $localBooks = collect(); // empty since trending is API-only
+                break;
+
+            default:
+                $localBooks = collect();
         }
 
-        // 🔎 Search from DB
-        $localBooks = Book::where('title', 'like', "%{$query}%")
-            ->orWhere('author', 'like', "%{$query}%")
-            ->get();
-
-        // 🔎 Search from Google Books API
+        // For categories we don’t need external API
         $apiBooks = [];
-        $response = Http::get('https://www.googleapis.com/books/v1/volumes', [
-            'q' => $query,
-            'key' => env('GOOGLE_BOOKS_API_KEY'),
-            'maxResults' => 10
-        ]);
-
-        if ($response->successful()) {
-            $apiBooksRaw = $response->json('items') ?? [];
-
-            // Only books with ISBN
-            $apiBooks = collect($apiBooksRaw)->filter(function ($item) {
-                $volume = $item['volumeInfo'] ?? [];
-                $isbn = collect($volume['industryIdentifiers'] ?? [])->firstWhere('type', 'ISBN_13')['identifier']
-                    ?? collect($volume['industryIdentifiers'] ?? [])->firstWhere('type', 'ISBN_10')['identifier']
-                    ?? null;
-
-                return $isbn !== null;
-            })->values();
-        }
-
-        return view('books.search', compact('query', 'localBooks', 'apiBooks'));
+        return view('books.search', compact('query', 'localBooks', 'apiBooks', 'category'));
     }
 
+    // ✅ Prevent empty searches
+    if (empty($query)) {
+        return redirect()->back()->with('error', 'Please enter a search term.');
+    }
+
+    // 🔎 Normal DB search
+    $localBooks = Book::where('title', 'like', "%{$query}%")
+        ->orWhere('author', 'like', "%{$query}%")
+        ->get();
+
+    // 🔎 External API search
+    $apiBooks = [];
+    $response = Http::get('https://www.googleapis.com/books/v1/volumes', [
+        'q' => $query,
+        'key' => env('GOOGLE_BOOKS_API_KEY'),
+        'maxResults' => 10
+    ]);
+
+    if ($response->successful()) {
+        $apiBooksRaw = $response->json('items') ?? [];
+
+        $apiBooks = collect($apiBooksRaw)->filter(function ($item) {
+            $volume = $item['volumeInfo'] ?? [];
+            $isbn = collect($volume['industryIdentifiers'] ?? [])->firstWhere('type', 'ISBN_13')['identifier']
+                ?? collect($volume['industryIdentifiers'] ?? [])->firstWhere('type', 'ISBN_10')['identifier']
+                ?? null;
+
+            return $isbn !== null;
+        })->values();
+    }
+
+    return view('books.search', compact('query', 'localBooks', 'apiBooks'));
+}
 
 
     public function create()

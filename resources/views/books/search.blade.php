@@ -58,7 +58,7 @@
                             class="max-w-7xl mx-auto mt-8 p-4 bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800 rounded-lg shadow-sm">
                             {{ session('error') }}
                         </div>
-                    </div>
+                    </div>s
                 @endif
 
 

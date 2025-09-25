@@ -52,25 +52,20 @@
                             </div>
                         </div>
                     @endif
-
-
                 </form>
-
             </div>
 
             <!-- Book Categories -->
             <div class="space-y-12">
 
-                <!-- Category Component -->
                 @php
                     $categories = [
                         ['title' => 'Trending Books', 'data' => $trendingBooks, 'id' => 'trending-books', 'external' => true],
-                        ['title' => 'Comics & Graphic Novels', 'data' => $comics, 'id' => 'comics-book'],
-                        ['title' => 'Action & Adventure', 'data' => $action, 'id' => 'action-book'],
-                        ['title' => 'Fiction Books', 'data' => $fiction, 'id' => 'fiction-book'],
-                        ['title' => 'Horror Books', 'data' => $horror, 'id' => 'horror-book'],
-                        ['title' => 'Thriller Books', 'data' => $thriller, 'id' => 'thriller-book']
-
+                        ['title' => 'Comics & Graphic Novels', 'data' => $comics, 'id' => 'comics-books'],
+                        ['title' => 'Action & Adventure', 'data' => $action, 'id' => 'action-books'],
+                        ['title' => 'Fiction Books', 'data' => $fiction, 'id' => 'fiction-books'],
+                        ['title' => 'Horror Books', 'data' => $horror, 'id' => 'horror-books'],
+                        ['title' => 'Thriller Books', 'data' => $thriller, 'id' => 'thriller-books']
                     ];
                 @endphp
 
@@ -78,11 +73,12 @@
                     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
                         <div class="flex items-center justify-between mb-6">
                             <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $category['title'] }}</h2>
-                            <a href="{{ route('books.search') }}"
+                            <a href="{{ route('books.search') }}?category={{ $category['id'] }}"
                                 class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium hover:underline transition-colors">
                                 View All →
                             </a>
                         </div>
+
                         <div class="relative group">
                             <button onclick="scrollToLeft('{{ $category['id'] }}')"
                                 class="hidden group-hover:flex items-center justify-center absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 shadow-lg rounded-full w-10 h-10">
@@ -93,32 +89,31 @@
                                 class="overflow-x-auto whitespace-nowrap px-4 no-scrollbar scroll-smooth">
                                 <div id="{{ $category['id'] }}" class="inline-flex gap-4 py-2">
                                     @forelse ($category['data'] as $book)
-                                                        <div
-                                                            class="min-w-[160px] bg-white dark:bg-gray-700 rounded-xl shadow-md p-4 hover:-translate-y-2 hover:shadow-xl transition duration-300">
-                                                            <a
-                                                                href="{{ $category['external'] ?? false
-                                        ? route('books.external.show', ['isbn' => $book['isbn']])
-                                        : route('books.external.show', ['isbn' => $book->isbn, 'id' => $book->id ?? null]) }}">
-                                                                <img src="{{ $book['thumbnail'] ?? $book->cover_image ?? 'https://dummyimage.com/150x200/cccccc/000000&text=No+Image' }}"
-                                                                    alt="{{ $book['title'] ?? $book->title }}"
-                                                                    class="w-32 h-auto mx-auto mb-4 rounded-md" />
-                                                                <h3
-                                                                    class="text-lg font-semibold text-gray-800 dark:text-white line-clamp-1 truncate w-40">
-                                                                    {{ $book['title'] ?? $book->title }}
-                                                                </h3>
-                                                                <p class="text-sm text-gray-600 dark:text-gray-300 truncate w-36">
-                                                                    {{ is_array($book['authors'] ?? null)
-                                        ? implode(', ', $book['authors'])
-                                        : ($book['author'] ?? 'Unknown Author') }}
-                                                                </p>
-                                                                @if(isset($book['description']))
-                                                                    <p class="text-sm text-gray-500 dark:text-gray-200 truncate w-36">
-                                                                        {{ \Illuminate\Support\Str::limit($book['description'], 100) }}
-                                                                    </p>
-                                                                @endif
-
-                                                            </a>
-                                                        </div>
+                                        <div
+                                            class="min-w-[160px] bg-white dark:bg-gray-700 rounded-xl shadow-md p-4 hover:-translate-y-2 hover:shadow-xl transition duration-300">
+                                            <a
+                                                href="{{ $category['external'] ?? false
+                                                    ? route('books.external.show', ['isbn' => $book['isbn']])
+                                                    : route('books.external.show', ['isbn' => $book->isbn, 'id' => $book->id ?? null]) }}">
+                                                <img src="{{ $book['thumbnail'] ?? $book->cover_image ?? 'https://dummyimage.com/150x200/cccccc/000000&text=No+Image' }}"
+                                                    alt="{{ $book['title'] ?? $book->title }}"
+                                                    class="w-32 h-auto mx-auto mb-4 rounded-md" />
+                                                <h3
+                                                    class="text-lg font-semibold text-gray-800 dark:text-white line-clamp-1 truncate w-40">
+                                                    {{ $book['title'] ?? $book->title }}
+                                                </h3>
+                                                <p class="text-sm text-gray-600 dark:text-gray-300 truncate w-36">
+                                                    {{ is_array($book['authors'] ?? null)
+                                                        ? implode(', ', $book['authors'])
+                                                        : ($book['author'] ?? 'Unknown Author') }}
+                                                </p>
+                                                @if(isset($book['description']))
+                                                    <p class="text-sm text-gray-500 dark:text-gray-200 truncate w-36">
+                                                        {{ \Illuminate\Support\Str::limit($book['description'], 100) }}
+                                                    </p>
+                                                @endif
+                                            </a>
+                                        </div>
                                     @empty
                                         <p class="text-gray-500 dark:text-gray-300">No books found.</p>
                                     @endforelse
@@ -154,12 +149,11 @@
         let errorBox = document.getElementById("error-box");
         if (errorBox) {
             setTimeout(() => {
-                errorBox.classList.add("opacity-0", "-translate-y-4"); // fade + slide up
-            }, 3000); // start after 3s
-
+                errorBox.classList.add("opacity-0", "-translate-y-4");
+            }, 3000);
             setTimeout(() => {
-                errorBox.style.display = "none"; // fully remove after transition
-            }, 3800); // matches duration
+                errorBox.style.display = "none";
+            }, 3800);
         }
     });
 </script>
