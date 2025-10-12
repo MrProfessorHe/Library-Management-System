@@ -70,62 +70,69 @@
                 @endphp
 
                 @foreach($categories as $category)
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
-                        <div class="flex items-center justify-between mb-6">
-                            <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $category['title'] }}</h2>
-                            <a href="{{ route('books.search') }}?category={{ $category['id'] }}"
-                                class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium hover:underline transition-colors">
-                                View All →
-                            </a>
-                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
+                            <div class="flex items-center justify-between mb-6">
+                                <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $category['title'] }}</h2>
+                                @if ($category['title'] !== 'Trending Books')
+                                    <a href="{{ route('books.search') }}?category={{ $category['id'] }}"
+                                        class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium hover:underline transition-colors">
+                                        View All →
+                                    </a>
+                                @endif
 
-                        <div class="relative group">
-                            <button onclick="scrollToLeft('{{ $category['id'] }}')"
-                                class="hidden group-hover:flex items-center justify-center absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 shadow-lg rounded-full w-10 h-10">
-                                ‹
-                            </button>
-
-                            <div id="{{ $category['id'] }}-wrapper"
-                                class="overflow-x-auto whitespace-nowrap px-4 no-scrollbar scroll-smooth">
-                                <div id="{{ $category['id'] }}" class="inline-flex gap-4 py-2">
-                                    @forelse ($category['data'] as $book)
-                                        <div
-                                            class="min-w-[160px] bg-white dark:bg-gray-700 rounded-xl shadow-md p-4 hover:-translate-y-2 hover:shadow-xl transition duration-300">
-                                            <a
-                                                href="{{ $category['external'] ?? false
-                                                    ? route('books.external.show', ['isbn' => $book['isbn']])
-                                                    : route('books.external.show', ['isbn' => $book->isbn, 'id' => $book->id ?? null]) }}">
-                                                <img src="{{ $book['thumbnail'] ?? $book->cover_image ?? 'https://dummyimage.com/150x200/cccccc/000000&text=No+Image' }}"
-                                                    alt="{{ $book['title'] ?? $book->title }}"
-                                                    class="w-32 h-auto mx-auto mb-4 rounded-md" />
-                                                <h3
-                                                    class="text-lg font-semibold text-gray-800 dark:text-white line-clamp-1 truncate w-40">
-                                                    {{ $book['title'] ?? $book->title }}
-                                                </h3>
-                                                <p class="text-sm text-gray-600 dark:text-gray-300 truncate w-36">
-                                                    {{ is_array($book['authors'] ?? null)
-                                                        ? implode(', ', $book['authors'])
-                                                        : ($book['author'] ?? 'Unknown Author') }}
-                                                </p>
-                                                @if(isset($book['description']))
-                                                    <p class="text-sm text-gray-500 dark:text-gray-200 truncate w-36">
-                                                        {{ \Illuminate\Support\Str::limit($book['description'], 100) }}
-                                                    </p>
-                                                @endif
-                                            </a>
-                                        </div>
-                                    @empty
-                                        <p class="text-gray-500 dark:text-gray-300">No books found.</p>
-                                    @endforelse
-                                </div>
                             </div>
 
-                            <button onclick="scrollToRight('{{ $category['id'] }}')"
-                                class="hidden group-hover:flex items-center justify-center absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 shadow-lg rounded-full w-10 h-10">
-                                ›
-                            </button>
+                            <div class="relative group">
+                                <!-- Left Scroll Button -->
+                                <button onclick="scrollToLeft('{{ $category['id'] }}')" class="hidden group-hover:flex items-center justify-center absolute left-2 top-1/2 -translate-y-1/2 z-10
+                       bg-blue-200 dark:bg-blue-800 hover:bg-blue-300 dark:hover:bg-blue-700
+                       text-blue-700 dark:text-blue-300 shadow-md rounded-full w-10 h-10 transition duration-200">
+                                    ‹
+                                </button>
+
+                                <div id="{{ $category['id'] }}-wrapper"
+                                    class="overflow-x-auto whitespace-nowrap px-4 no-scrollbar scroll-smooth">
+                                    <div id="{{ $category['id'] }}" class="inline-flex gap-4 py-2">
+                                        @forelse ($category['data'] as $book)
+                                                            <div
+                                                                class="min-w-[160px] bg-white dark:bg-gray-700 rounded-xl shadow-md p-4 hover:-translate-y-2 hover:shadow-xl transition duration-300">
+                                                                <a
+                                                                    href="{{ $category['external'] ?? false
+                                            ? route('books.external.show', ['isbn' => $book['isbn']])
+                                            : route('books.external.show', ['isbn' => $book->isbn, 'id' => $book->id ?? null]) }}">
+                                                                    <img src="{{ $book['thumbnail'] ?? $book->cover_image ?? 'https://dummyimage.com/150x200/cccccc/000000&text=No+Image' }}"
+                                                                        alt="{{ $book['title'] ?? $book->title }}"
+                                                                        class="w-32 h-auto mx-auto mb-4 rounded-md" />
+                                                                    <h3
+                                                                        class="text-lg font-semibold text-gray-800 dark:text-white line-clamp-1 truncate w-40">
+                                                                        {{ $book['title'] ?? $book->title }}
+                                                                    </h3>
+                                                                    <p class="text-sm text-gray-600 dark:text-gray-300 truncate w-36">
+                                                                        {{ is_array($book['authors'] ?? null)
+                                            ? implode(', ', $book['authors'])
+                                            : ($book['author'] ?? 'Unknown Author') }}
+                                                                    </p>
+                                                                    @if(isset($book['description']))
+                                                                        <p class="text-sm text-gray-500 dark:text-gray-200 truncate w-36">
+                                                                            {{ \Illuminate\Support\Str::limit($book['description'], 100) }}
+                                                                        </p>
+                                                                    @endif
+                                                                </a>
+                                                            </div>
+                                        @empty
+                                            <p class="text-gray-500 dark:text-gray-300">No books found.</p>
+                                        @endforelse
+                                    </div>
+                                </div>
+
+                                <!-- Right Scroll Button -->
+                                <button onclick="scrollToRight('{{ $category['id'] }}')" class="hidden group-hover:flex items-center justify-center absolute right-2 top-1/2 -translate-y-1/2 z-10
+                       bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600
+                       text-white shadow-md rounded-full w-10 h-10 transition duration-200">
+                                    ›
+                                </button>
+                            </div>
                         </div>
-                    </div>
                 @endforeach
 
             </div>
