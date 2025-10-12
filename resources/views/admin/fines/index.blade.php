@@ -96,13 +96,13 @@
                                                 Reminder
                                             </button>
                                         </form>
-                                        @if (($user->pending_fines_amount ?? 0) + ($user->paid_fines_amount ?? 0) > 0)
-                                            <a href="{{ route('admin.fines.receipt', $user->id) }}" target="_blank"
-                                                class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-md text-sm font-semibold shadow transition">
-                                                Print Receipt
+                                        @if(($user->paid_fines_amount ?? 0) > 0)
+                                            <a href="{{ route('admin.fines.receipt', ['id' => $user->id]) }}" target="_blank"
+                                            class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-md text-sm font-semibold shadow transition">
+                                            Print Receipt
                                             </a>
                                         @else
-                                            <button onclick="alert('No fine or receipt available for this user.')"
+                                            <button onclick="alert('No paid fines available for this user.')"
                                                 class="bg-gray-400 cursor-not-allowed text-white px-5 py-2 rounded-md text-sm font-semibold shadow transition">
                                                 Print Receipt
                                             </button>

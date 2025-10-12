@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\FineReminderMail;
+use Carbon\Carbon;
 
 class FineManagementController extends Controller
 {
@@ -45,45 +46,47 @@ class FineManagementController extends Controller
         $this->middleware('role:admin,librarian');
     }
 
-    public function index(Request $request)
-    {
-        $query = User::query()
-            ->withSum(['fines as pending_fines_amount' => function ($q) {
-                $q->where('status', 'pending');
-            }], 'amount')
-            ->withSum(['fines as paid_fines_amount' => function ($q) {
-                $q->where('status', 'paid');
-            }], 'amount');
 
+public function index(Request $request)
+{
+    $sevenDaysAgo = Carbon::now()->subDays(7);
 
-        if ($request->has('filter')) {
-            switch ($request->filter) {
-                case 'pending':
-                    $query->whereHas('fines', fn($q) => $q->where('status', 'pending'));
-                    break;
-                case 'paid':
-                    $query->whereHas('fines', fn($q) => $q->where('status', 'paid'));
-                    break;
-                case 'none':
-                    $query->doesntHave('fines');
-                    break;
-            }
-        }
+    // Get users with either pending or recently paid fines
+    $query = User::query()
+        ->withSum(['fines as pending_fines_amount' => function ($q) {
+            $q->where('status', 'pending');
+        }], 'amount')
+        ->withSum(['fines as paid_fines_amount' => function ($q) use ($sevenDaysAgo) {
+            $q->where('status', 'paid')->where('paid_at', '>=', $sevenDaysAgo);
+        }], 'amount')
+        ->whereHas('fines', function ($q) use ($sevenDaysAgo) {
+            $q->where('status', 'pending')
+              ->orWhere(function ($q2) use ($sevenDaysAgo) {
+                  $q2->where('status', 'paid')->where('paid_at', '>=', $sevenDaysAgo);
+              });
+        });
 
-        if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                    ->orWhere('email', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        $users = $query->get();
-
-        $totalPending = Fine::pending()->sum('amount');
-        $totalPaid = Fine::paid()->sum('amount');
-
-        return view('admin.fines.index', compact('users', 'totalPending', 'totalPaid'));
+    // Optional: search by name/email
+    if ($request->filled('search')) {
+        $query->where(function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->search . '%')
+              ->orWhere('email', 'like', '%' . $request->search . '%');
+        });
     }
+
+    $users = $query->get();
+
+    // Sort: pending users first, then paid users
+    $users = $users->sortByDesc('pending_fines_amount')->values();
+
+    // Summary totals
+    $totalPending = $users->sum('pending_fines_amount');
+    $totalPaid = $users->sum('paid_fines_amount');
+
+    return view('admin.fines.index', compact('users', 'totalPending', 'totalPaid'));
+}
+
+
 
     public function userFines(User $user)
     {
