@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\FineManagementController;
 use App\Http\Controllers\Admin\LendingManagementController;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Admin\FineReceiptController;
+use App\Http\Controllers\LendingController;
 
 
 // Show profile page
@@ -42,8 +43,6 @@ Route::get('/users', [UserManagementController::class, 'index'])->name('users.in
 Route::get('/admin/users/{user}/fines', [UserManagementController::class, 'showFines'])->name('admin.users.fines');
 
 Route::get('/admin/users/{user}/fines', [FineManagementController::class, 'userFines'])->name('fines.user');
-
-Route::put('/lendings/{lending}/return', [LendingManagementController::class, 'markAsReturned'])->name('lendings.return');
 
 
 // External book details (must be before resource!)
@@ -75,12 +74,18 @@ Route::get('/user-list', [UserController::class, 'index'])->middleware(['auth'])
 Route::get('/search', [BookController::class, 'search'])->name('books.search');
 
 
+
+// Borrow (USER)
 Route::middleware(['auth'])->group(function () {
-    Route::post('/lendings/request/{book}', [LendingManagementController::class, 'requestBorrow'])->name('lendings.request');
-    Route::post('/lendings/{lending}/approve', [LendingManagementController::class, 'approve'])->name('lendings.approve');
-    Route::post('/lendings/{lending}/reject', [LendingManagementController::class, 'reject'])->name('lendings.reject');
+    Route::post('/books/{book}/borrow', [LendingController::class, 'requestBorrow'])
+        ->name('lendings.request');
 });
 
+// User returns a book they borrowed
+Route::post('/lendings/{lending}/return', [LendingController::class, 'returnByUser'])
+    ->name('lendings.return.user');
+
+    
 // Admin Routes
 Route::middleware(['auth', 'role:admin,librarian'])->prefix('admin')->name('admin.')->group(function () {
     // User Management

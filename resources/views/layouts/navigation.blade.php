@@ -2,9 +2,8 @@
     class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-md border-b border-gray-200 dark:border-gray-700 fixed w-full z-50 top-0">
     <div class="w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
-            <!-- Left section: Logo & Heading -->
+            <!-- Left section -->
             <div class="flex items-center space-x-6">
-                <!-- Logo + Heading together -->
                 <a href="{{ route('home') }}" class="flex items-center space-x-3 hover:opacity-90 transition-opacity duration-200">
                     <img src="{{ asset('images/BookLogoB.png') }}" alt="Library Logo" class="h-10 block dark:hidden">
                     <img src="{{ asset('images/BookLogoW.png') }}" alt="Library Logo" class="h-10 hidden dark:block">
@@ -24,13 +23,13 @@
                     </x-nav-link>
 
                     @if(auth()->user() && (auth()->user()->role === 'admin' || auth()->user()->role === 'librarian'))
-                        <x-nav-link :href="route('books.insertBook')" :active="request()->routeIs('books.insertBook', 'books.edit', 'books.update', 'books.create')">
+                        <x-nav-link :href="route('books.insertBook')" :active="request()->routeIs('books.*')">
                             {{ __('Manage Books') }}
                         </x-nav-link>
                         <x-nav-link :href="route('admin.lendings.index')" :active="request()->routeIs('admin.lendings.*')">
                             {{ __('Manage Lendings') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('admin.fines.index')" :active="request()->routeIs('admin.fines.index', 'admin.fines.user', 'admin.fines.report')">
+                        <x-nav-link :href="route('admin.fines.index')" :active="request()->routeIs('admin.fines.*')">
                             {{ __('Manage Fines') }}
                         </x-nav-link>
                         <x-nav-link :href="route('admin.fines.rules')" :active="request()->routeIs('admin.fines.rules')">
@@ -46,7 +45,7 @@
                 </div>
             </div>
 
-            <!-- Right section: Auth/User -->
+            <!-- Right section -->
             <div class="hidden sm:flex items-center space-x-4">
                 @auth
                     <x-dropdown align="right" width="48">
@@ -98,7 +97,7 @@
         </div>
     </div>
 
-    <!-- Mobile Responsive Nav -->
+    <!-- Mobile Nav -->
     <div :class="{ 'block': open, 'hidden': !open }"
         class="sm:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-4 pt-4 pb-6 space-y-2 text-sm">
         <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
@@ -112,7 +111,7 @@
             <x-responsive-nav-link :href="route('admin.lendings.index')" :active="request()->routeIs('admin.lendings.*')">
                 {{ __('Manage Lendings') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('admin.fines.index')" :active="request()->routeIs('admin.fines.index', 'admin.fines.user', 'admin.fines.report')">
+            <x-responsive-nav-link :href="route('admin.fines.index')" :active="request()->routeIs('admin.fines.*')">
                 {{ __('Manage Fines') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('admin.fines.rules')" :active="request()->routeIs('admin.fines.rules')">
@@ -147,3 +146,6 @@
         @endauth
     </div>
 </nav>
+
+<!-- ✅ Spacer to prevent navbar overlap -->
+<div class="h-16"></div>

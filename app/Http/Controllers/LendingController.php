@@ -6,7 +6,7 @@ use App\Models\Lending;
 use App\Models\Book;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon; // <-- Make sure this is imported
+use Carbon\Carbon;
 
 class LendingController extends Controller
 {
@@ -76,10 +76,12 @@ class LendingController extends Controller
             return redirect()->back()->with('error', "You have already {$statusMessage} this book.");
         }
 
-        // Create a new request
+        // Create a new request WITH dates
         Lending::create([
             'book_id' => $book->id,
             'user_id' => $userId,
+            'issued_at' => now(), // Add issued date
+            'return_at' => now()->addDays(14), // Add return date (14 days from now)
             'status' => 'pending',
         ]);
 
@@ -105,7 +107,7 @@ class LendingController extends Controller
         $lending->update([
             'status' => 'approved',
             'approved_at' => now(),
-            'issued_at' => now(),
+            'issued_at' => now(), // Ensure issued date is set
             'return_at' => now()->addDays(7), // Set a 7-day return period
         ]);
 
@@ -127,8 +129,4 @@ class LendingController extends Controller
 
         return redirect()->back()->with('success', 'Lending request rejected.');
     }
-
-    // Note: The methods `manage()` and `manageRequests()` are now redundant
-    // because their functionality is fully handled by the improved `index()` method.
-    // It is recommended to remove them and update your routes accordingly.
 }

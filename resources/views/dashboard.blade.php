@@ -152,8 +152,8 @@
                             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                                 @foreach($activeOverdue as $lending)
                                     @php
-                                        // Calculate days overdue
-                                        $daysOverdue = (int)$lending->return_at->diffInDays(now());
+                                        // Calculate days overdue - FIXED: Use floor() for whole days
+                                        $daysOverdue = (int)floor($lending->return_at->diffInDays(now()));
                                         
                                         // Get the latest active fine rule and calculate actual fine
                                         $fineRule = App\Models\FineRule::where('is_active', true)
@@ -238,8 +238,13 @@
                                                         Returned: {{ $lending->returned_at->format('M d, Y') }}
                                                     </p>
                                                 @endif
+                                                {{-- FIXED: Use floor() to get whole days --}}
                                                 <p class="text-xs text-green-500 dark:text-green-400">
-                                                    Borrowed for {{ $lending->issued_at ? $lending->issued_at->diffInDays($lending->returned_at) : 'N/A' }} days
+                                                    @if($lending->issued_at && $lending->returned_at)
+                                                        Borrowed for {{ (int)floor($lending->issued_at->diffInDays($lending->returned_at)) }} days
+                                                    @else
+                                                        Borrowed for N/A days
+                                                    @endif
                                                 </p>
                                             </div>
                                         </div>
