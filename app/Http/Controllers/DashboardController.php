@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -9,7 +8,6 @@ use App\Models\Lending;
 use App\Models\User;
 use App\Models\Book;
 use Illuminate\Support\Carbon;
-
 
 class DashboardController extends Controller
 {
@@ -27,14 +25,17 @@ class DashboardController extends Controller
             $members = $users->map(function ($user) {
                 $totalRequests = $user->lendings->count();
                 $approved = $user->lendings->where('status', 'approved')->count();
-                $currentlyBorrowed = $user->lendings->where('status', 'approved')
-                    ->where('return_at', '>=', now())
+                
+                // FIXED: Currently borrowed should be approved and NOT returned
+                $currentlyBorrowed = $user->lendings
+                    ->where('status', 'approved')
+                    ->whereNull('returned_at')
                     ->count();
 
-                $fine = $user->getCurrentFineAmount(); // ✅ Fix here
+                $fine = $user->getCurrentFineAmount();
 
                 return [
-                    'id' => $user->id, // 👈 Add this
+                    'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
                     'total_requests' => $totalRequests,
@@ -46,11 +47,19 @@ class DashboardController extends Controller
 
             return view('dashboard', compact('totalUsers', 'totalBooks', 'totalLendings', 'members'));
         } else {
-            $lendings = Lending::with('book')->where('user_id', $user->id)->get();
+            // Regular user dashboard - FIXED: Get all user's lendings
+            $lendings = Lending::with('book')
+                ->where('user_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->get();
 
+            // FIXED: Only show ACTIVE overdue books (approved, not returned, and past due date)
             $overdue = Lending::with('book')
                 ->where('user_id', $user->id)
-                ->whereDate('return_at', '<', now())
+                ->where('status', 'approved') // Only approved books
+                ->whereNull('returned_at')    // Not returned yet
+                ->where('return_at', '<', now()) // Past due date
+                ->orderBy('return_at', 'asc')
                 ->get();
 
             // Initialize empty members array for non-admin users

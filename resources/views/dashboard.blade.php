@@ -72,18 +72,21 @@
                     @php
                         // Get only last 3 months lendings sorted by latest first
                         $recentLendings = isset($lendings) ? $lendings->where('created_at', '>=', now()->subMonths(3))->sortByDesc('created_at') : collect();
+                        
+                        // Filter out returned books from recent lendings for better UX
+                        $activeLendings = $recentLendings->where('status', '!=', 'returned');
                     @endphp
                     
-                    @if($recentLendings->count() > 0)
+                    @if($activeLendings->count() > 0)
                         <div class="mb-8">
                             <div class="flex items-center justify-between mb-4">
-                                <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Recent Lendings</h2>
+                                <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">My Active Lendings</h2>
                                 <span class="text-sm text-gray-500 dark:text-gray-400">
                                     Last 3 months
                                 </span>
                             </div>
                             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                @foreach($recentLendings as $lending)
+                                @foreach($activeLendings as $lending)
                                     <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 hover:shadow-md transition-shadow">
                                         <div class="flex justify-between items-start">
                                             <div class="flex-1">
@@ -98,15 +101,29 @@
                                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                                                             Approved
                                                         </span>
+                                                    @elseif($lending->status === 'returned')
+                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                                            Returned
+                                                        </span>
                                                     @else
                                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
                                                             {{ ucfirst($lending->status) }}
                                                         </span>
                                                     @endif
                                                 </p>
-                                                @if($lending->return_at)
+                                                @if($lending->issued_at)
+                                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                                        Issued: {{ $lending->issued_at->format('M d, Y') }}
+                                                    </p>
+                                                @endif
+                                                @if($lending->return_at && $lending->status !== 'returned')
                                                     <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">
                                                         Due Date: {{ $lending->return_at->format('M d, Y') }}
+                                                    </p>
+                                                @endif
+                                                @if($lending->returned_at)
+                                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                                        Returned: {{ $lending->returned_at->format('M d, Y') }}
                                                     </p>
                                                 @endif
                                                 <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -120,11 +137,39 @@
                         </div>
                     @endif
 
-                    @if(isset($overdue) && $overdue->count() > 0)
+                    {{-- Only show ACTIVE overdue books (not returned and past due date) --}}
+                    @php
+                        // Calculate active overdue books for the current user
+                        $activeOverdue = isset($lendings) ? $lendings->where('status', 'approved')
+                                                            ->whereNull('returned_at')
+                                                            ->where('return_at', '<', now())
+                                                            ->sortByDesc('return_at') : collect();
+                    @endphp
+
+                    @if($activeOverdue->count() > 0)
                         <div class="mb-8">
                             <h2 class="text-xl font-semibold mb-4 text-red-600 dark:text-red-400">Overdue Books</h2>
                             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                @foreach($overdue as $lending)
+                                @foreach($activeOverdue as $lending)
+                                    @php
+                                        // Calculate days overdue
+                                        $daysOverdue = (int)$lending->return_at->diffInDays(now());
+                                        
+                                        // Get the latest active fine rule and calculate actual fine
+                                        $fineRule = App\Models\FineRule::where('is_active', true)
+                                                                      ->orderBy('created_at', 'desc')
+                                                                      ->first();
+                                        
+                                        // Check if there's already a paid fine for this lending
+                                        $existingPaidFine = $lending->fines()->where('status', 'paid')->exists();
+                                        
+                                        // Calculate fine using your actual fine rules
+                                        if ($fineRule && !$existingPaidFine) {
+                                            $fineAmount = $fineRule->calculateFine($daysOverdue);
+                                        } else {
+                                            $fineAmount = 0; // No fine if already paid or no rule
+                                        }
+                                    @endphp
                                     <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
                                         <div class="flex justify-between items-start">
                                             <div class="flex-1">
@@ -132,30 +177,69 @@
                                                 <p class="text-sm text-red-600 dark:text-red-400 mb-1">
                                                     Due: {{ $lending->return_at->format('M d, Y') }}
                                                 </p>
-                                                @php
-                                                    // Correct calculation for days overdue - show only integer
-                                                    $daysOverdue = $lending->return_at->isPast() 
-                                                        ? (int)$lending->return_at->diffInDays(now()) 
-                                                        : 0;
-                                                    
-                                                    // Get the latest active fine rule and calculate actual fine
-                                                    $fineRule = App\Models\FineRule::where('is_active', true)
-                                                                                  ->orderBy('created_at', 'desc')
-                                                                                  ->first();
-                                                    
-                                                    // Calculate fine using your actual fine rules
-                                                    if ($fineRule) {
-                                                        $fineAmount = $fineRule->calculateFine($daysOverdue);
-                                                    } else {
-                                                        // Fallback calculation if no rules exist
-                                                        $fineAmount = $daysOverdue * 5; // Default ₹5 per day
-                                                    }
-                                                @endphp
                                                 <p class="text-sm text-red-600 dark:text-red-400 mb-2">
                                                     Days Overdue: {{ $daysOverdue }}
                                                 </p>
-                                                <p class="text-sm font-semibold text-red-700 dark:text-red-300">
-                                                    Fine: ₹{{ number_format($fineAmount, 2) }}
+                                                @if($fineAmount > 0 && !$existingPaidFine)
+                                                    <p class="text-sm font-semibold text-red-700 dark:text-red-300 mb-2">
+                                                        Fine: ₹{{ number_format($fineAmount, 2) }}
+                                                    </p>
+                                                    <p class="text-xs text-red-600 dark:text-red-400 italic">
+                                                        Please return the book to avoid additional fines
+                                                    </p>
+                                                @elseif($existingPaidFine)
+                                                    <p class="text-sm font-semibold text-green-600 dark:text-green-400 mb-2">
+                                                        Fine Paid ✓
+                                                    </p>
+                                                @else
+                                                    <p class="text-sm text-red-600 dark:text-red-400 mb-2">
+                                                        No fine applicable
+                                                    </p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Show returned books separately --}}
+                    @php
+                        $returnedBooks = isset($lendings) ? $lendings->where('status', 'returned')
+                                                         ->where('created_at', '>=', now()->subMonths(3))
+                                                         ->sortByDesc('returned_at') : collect();
+                    @endphp
+
+                    @if($returnedBooks->count() > 0)
+                        <div class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Recently Returned Books</h2>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">
+                                    Last 3 months
+                                </span>
+                            </div>
+                            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                @foreach($returnedBooks as $lending)
+                                    <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                                        <div class="flex justify-between items-start">
+                                            <div class="flex-1">
+                                                <h3 class="font-semibold text-green-800 dark:text-green-200 mb-2">{{ $lending->book->title }}</h3>
+                                                <p class="text-sm text-green-600 dark:text-green-400 mb-1">
+                                                    Status: <span class="font-semibold">Returned</span>
+                                                </p>
+                                                @if($lending->issued_at)
+                                                    <p class="text-sm text-green-600 dark:text-green-400 mb-1">
+                                                        Issued: {{ $lending->issued_at->format('M d, Y') }}
+                                                    </p>
+                                                @endif
+                                                @if($lending->returned_at)
+                                                    <p class="text-sm text-green-600 dark:text-green-400 mb-1">
+                                                        Returned: {{ $lending->returned_at->format('M d, Y') }}
+                                                    </p>
+                                                @endif
+                                                <p class="text-xs text-green-500 dark:text-green-400">
+                                                    Borrowed for {{ $lending->issued_at ? $lending->issued_at->diffInDays($lending->returned_at) : 'N/A' }} days
                                                 </p>
                                             </div>
                                         </div>
@@ -165,7 +249,7 @@
                         </div>
                     @endif
 
-                    @if((!isset($recentLendings) || $recentLendings->count() === 0) && (!isset($overdue) || $overdue->count() === 0))
+                    @if($activeLendings->count() === 0 && $activeOverdue->count() === 0 && $returnedBooks->count() === 0)
                         <div class="text-center py-12">
                             <div class="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
                                 <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
