@@ -14,8 +14,6 @@ use Carbon\Carbon;
 
 class FineManagementController extends Controller
 {
-
-
     public function sendReminder(User $user)
     {
         // Get all pending fines
@@ -38,55 +36,50 @@ class FineManagementController extends Controller
         return back()->with('success', 'Fine reminder sent to ' . $user->name);
     }
 
-
-
     public function __construct()
     {
         $this->middleware('auth');
         $this->middleware('role:admin,librarian');
     }
 
+    public function index(Request $request)
+    {
+        $sevenDaysAgo = Carbon::now()->subDays(7);
 
-public function index(Request $request)
-{
-    $sevenDaysAgo = Carbon::now()->subDays(7);
+        // Get users with either pending or recently paid fines
+        $query = User::query()
+            ->withSum(['fines as pending_fines_amount' => function ($q) {
+                $q->where('status', 'pending');
+            }], 'amount')
+            ->withSum(['fines as paid_fines_amount' => function ($q) use ($sevenDaysAgo) {
+                $q->where('status', 'paid')->where('paid_at', '>=', $sevenDaysAgo);
+            }], 'amount')
+            ->whereHas('fines', function ($q) use ($sevenDaysAgo) {
+                $q->where('status', 'pending')
+                  ->orWhere(function ($q2) use ($sevenDaysAgo) {
+                      $q2->where('status', 'paid')->where('paid_at', '>=', $sevenDaysAgo);
+                  });
+            });
 
-    // Get users with either pending or recently paid fines
-    $query = User::query()
-        ->withSum(['fines as pending_fines_amount' => function ($q) {
-            $q->where('status', 'pending');
-        }], 'amount')
-        ->withSum(['fines as paid_fines_amount' => function ($q) use ($sevenDaysAgo) {
-            $q->where('status', 'paid')->where('paid_at', '>=', $sevenDaysAgo);
-        }], 'amount')
-        ->whereHas('fines', function ($q) use ($sevenDaysAgo) {
-            $q->where('status', 'pending')
-              ->orWhere(function ($q2) use ($sevenDaysAgo) {
-                  $q2->where('status', 'paid')->where('paid_at', '>=', $sevenDaysAgo);
-              });
-        });
+        // Optional: search by name/email
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('email', 'like', '%' . $request->search . '%');
+            });
+        }
 
-    // Optional: search by name/email
-    if ($request->filled('search')) {
-        $query->where(function ($q) use ($request) {
-            $q->where('name', 'like', '%' . $request->search . '%')
-              ->orWhere('email', 'like', '%' . $request->search . '%');
-        });
+        $users = $query->get();
+
+        // Sort: pending users first, then paid users
+        $users = $users->sortByDesc('pending_fines_amount')->values();
+
+        // Summary totals
+        $totalPending = $users->sum('pending_fines_amount');
+        $totalPaid = $users->sum('paid_fines_amount');
+
+        return view('admin.fines.index', compact('users', 'totalPending', 'totalPaid'));
     }
-
-    $users = $query->get();
-
-    // Sort: pending users first, then paid users
-    $users = $users->sortByDesc('pending_fines_amount')->values();
-
-    // Summary totals
-    $totalPending = $users->sum('pending_fines_amount');
-    $totalPaid = $users->sum('paid_fines_amount');
-
-    return view('admin.fines.index', compact('users', 'totalPending', 'totalPaid'));
-}
-
-
 
     public function userFines(User $user)
     {
@@ -101,7 +94,6 @@ public function index(Request $request)
         return view('admin.fines.user', compact('user', 'pendingFines', 'paidFines', 'totalPending', 'totalPaid'));
     }
 
-
     public function markAsPaid(Fine $fine)
     {
         $fine->update([
@@ -109,10 +101,9 @@ public function index(Request $request)
             'paid_at' => now(),
         ]);
 
-        return redirect()->route('admin.fines.index') // 👈 redirect to summary page
+        return redirect()->route('admin.fines.index')
             ->with('success', 'Fine marked as paid successfully.');
     }
-
 
     public function waive(Fine $fine)
     {
@@ -121,10 +112,9 @@ public function index(Request $request)
             'paid_at' => now(),
         ]);
 
-        return redirect()->route('admin.fines.index') // 👈 back to summary
+        return redirect()->route('admin.fines.index')
             ->with('success', 'Fine waived successfully.');
     }
-
 
     public function bulkMarkAsPaid(Request $request)
     {
@@ -142,9 +132,6 @@ public function index(Request $request)
             ->with('success', 'Selected fines marked as paid successfully.');
     }
 
-
-
-
     public function fineRules()
     {
         $rules = FineRule::orderBy('created_at', 'desc')->get();
@@ -155,14 +142,27 @@ public function index(Request $request)
     public function createFineRule(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:fine_rules,name',
             'daily_rate' => 'required|numeric|min:0',
             'grace_period_days' => 'required|integer|min:0',
             'max_fine' => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
+            'is_active' => 'boolean',
         ]);
 
-        FineRule::create($request->all());
+        // Ensure only one rule is active at a time if the new rule is active
+        if ($request->is_active) {
+            FineRule::where('is_active', true)->update(['is_active' => false]);
+        }
+
+        FineRule::create([
+            'name' => $request->name,
+            'daily_rate' => $request->daily_rate,
+            'grace_period_days' => $request->grace_period_days,
+            'max_fine' => $request->max_fine,
+            'is_active' => $request->is_active ?? false,
+            'description' => $request->description,
+        ]);
 
         return redirect()->back()
             ->with('success', 'Fine rule created successfully.');
@@ -171,7 +171,7 @@ public function index(Request $request)
     public function updateFineRule(Request $request, FineRule $rule)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:fine_rules,name,' . $rule->id,
             'daily_rate' => 'required|numeric|min:0',
             'grace_period_days' => 'required|integer|min:0',
             'max_fine' => 'nullable|numeric|min:0',
@@ -179,7 +179,19 @@ public function index(Request $request)
             'is_active' => 'boolean',
         ]);
 
-        $rule->update($request->all());
+        // If activating this rule, deactivate all others
+        if ($request->is_active && !$rule->is_active) {
+            FineRule::where('is_active', true)->update(['is_active' => false]);
+        }
+
+        $rule->update([
+            'name' => $request->name,
+            'daily_rate' => $request->daily_rate,
+            'grace_period_days' => $request->grace_period_days,
+            'max_fine' => $request->max_fine,
+            'is_active' => $request->is_active ?? $rule->is_active,
+            'description' => $request->description,
+        ]);
 
         return redirect()->back()
             ->with('success', 'Fine rule updated successfully.');
@@ -214,10 +226,14 @@ public function index(Request $request)
     private function createFine($lending)
     {
         $daysOverdue = $lending->getDaysOverdue();
-        $fineRule = FineRule::active()->first();
+        
+        // FIXED: Always get the LATEST active rule to handle duplicates
+        $fineRule = FineRule::where('is_active', true)
+                            ->orderBy('created_at', 'desc') // Get most recent one
+                            ->first();
 
         if (!$fineRule) {
-            $amount = $daysOverdue * 5;
+            $amount = $daysOverdue * 5; // Fallback
         } else {
             $amount = $fineRule->calculateFine($daysOverdue);
         }
@@ -231,6 +247,14 @@ public function index(Request $request)
                 'status' => 'pending',
             ]);
         }
+    }
+
+    // NEW METHOD: Get active fine rule (for use in blade files)
+    public static function getActiveFineRule()
+    {
+        return FineRule::where('is_active', true)
+                      ->orderBy('created_at', 'desc')
+                      ->first();
     }
 
     public function report()

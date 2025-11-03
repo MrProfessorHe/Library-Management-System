@@ -69,11 +69,21 @@
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 md:p-8">
                     <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">My Dashboard</h1>
                     
-                    @if(isset($lendings) && $lendings->count() > 0)
+                    @php
+                        // Get only last 3 months lendings sorted by latest first
+                        $recentLendings = isset($lendings) ? $lendings->where('created_at', '>=', now()->subMonths(3))->sortByDesc('created_at') : collect();
+                    @endphp
+                    
+                    @if($recentLendings->count() > 0)
                         <div class="mb-8">
-                            <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">My Lendings</h2>
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Recent Lendings</h2>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">
+                                    Last 3 months
+                                </span>
+                            </div>
                             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                @foreach($lendings as $lending)
+                                @foreach($recentLendings as $lending)
                                     <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 hover:shadow-md transition-shadow">
                                         <div class="flex justify-between items-start">
                                             <div class="flex-1">
@@ -95,10 +105,13 @@
                                                     @endif
                                                 </p>
                                                 @if($lending->return_at)
-                                                    <p class="text-sm text-gray-600 dark:text-gray-400">
-                                                        Return Date: {{ $lending->return_at->format('M d, Y') }}
+                                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                                        Due Date: {{ $lending->return_at->format('M d, Y') }}
                                                     </p>
                                                 @endif
+                                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                                    Requested: {{ $lending->created_at->format('M d, Y') }}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -119,11 +132,30 @@
                                                 <p class="text-sm text-red-600 dark:text-red-400 mb-1">
                                                     Due: {{ $lending->return_at->format('M d, Y') }}
                                                 </p>
+                                                @php
+                                                    // Correct calculation for days overdue - show only integer
+                                                    $daysOverdue = $lending->return_at->isPast() 
+                                                        ? (int)$lending->return_at->diffInDays(now()) 
+                                                        : 0;
+                                                    
+                                                    // Get the latest active fine rule and calculate actual fine
+                                                    $fineRule = App\Models\FineRule::where('is_active', true)
+                                                                                  ->orderBy('created_at', 'desc')
+                                                                                  ->first();
+                                                    
+                                                    // Calculate fine using your actual fine rules
+                                                    if ($fineRule) {
+                                                        $fineAmount = $fineRule->calculateFine($daysOverdue);
+                                                    } else {
+                                                        // Fallback calculation if no rules exist
+                                                        $fineAmount = $daysOverdue * 5; // Default ₹5 per day
+                                                    }
+                                                @endphp
                                                 <p class="text-sm text-red-600 dark:text-red-400 mb-2">
-                                                    Days Overdue: {{ now()->diffInDays($lending->return_at) }}
+                                                    Days Overdue: {{ $daysOverdue }}
                                                 </p>
                                                 <p class="text-sm font-semibold text-red-700 dark:text-red-300">
-                                                    Fine: ₹{{ now()->diffInDays($lending->return_at) * 10 }}
+                                                    Fine: ₹{{ number_format($fineAmount, 2) }}
                                                 </p>
                                             </div>
                                         </div>
@@ -133,14 +165,14 @@
                         </div>
                     @endif
 
-                    @if((!isset($lendings) || $lendings->count() === 0) && (!isset($overdue) || $overdue->count() === 0))
+                    @if((!isset($recentLendings) || $recentLendings->count() === 0) && (!isset($overdue) || $overdue->count() === 0))
                         <div class="text-center py-12">
                             <div class="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
                                 <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                                 </svg>
                             </div>
-                            <p class="text-gray-600 dark:text-gray-400 text-lg">No lending history found.</p>
+                            <p class="text-gray-600 dark:text-gray-400 text-lg">No recent lending history found.</p>
                             <p class="text-gray-500 dark:text-gray-500 text-sm mt-2">Start by browsing our book collection!</p>
                         </div>
                     @endif
