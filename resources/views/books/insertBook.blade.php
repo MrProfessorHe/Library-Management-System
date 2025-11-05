@@ -137,7 +137,7 @@
         <td class="px-4 py-3 font-semibold">{{ $book->title }}</td>
         <td class="px-4 py-3 font-semibold">{{ $book->author }}</td>
         <td class="px-4 py-3 font-semibold">{{ $book->isbn }}</td>
-        <td class="px-4 py-3 font-semibold">{{ optional($book->bookType)->name ?? 'N/A' }}</td>
+        <td class="px-4 py-3 font-semibold">{{ optional($book->type)->name ?? 'N/A' }}</td>
         <td class="px-4 py-3 font-semibold">{{ optional($book->language)->name ?? 'N/A' }}</td>
         <td class="px-4 py-3 font-semibold">{{ $book->quantity }}</td>
         <td class="px-4 py-3">

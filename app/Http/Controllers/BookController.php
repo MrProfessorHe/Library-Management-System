@@ -18,43 +18,71 @@ class BookController extends Controller
 
 
     public function showExternal($isbn, $id = null)
-    {
-        $response = Http::get("https://www.googleapis.com/books/v1/volumes", [
-            'q' => 'isbn:' . $isbn,
-        ]);
+{
+    $response = Http::get("https://www.googleapis.com/books/v1/volumes", [
+        'q' => 'isbn:' . $isbn,
+    ]);
 
-        $data = $response->json();
+    $data = $response->json();
 
-        if (empty($data['items'][0])) {
-            abort(404, 'Book not found');
-        }
-
-        $volume = $data['items'][0]['volumeInfo'];
-
-        // Try to find the local book from DB
-        $localBook = null;
-        if ($id) {
-            $localBook = Book::find($id);
-        } else {
-            $localBook = Book::where('isbn', $isbn)->first();
-        }
-
-        // Prefer DB values if available
-        $book = [
-            'title'         => $localBook->title ?? $volume['title'] ?? 'No Title',
-            'authors'       => isset($localBook->author) ? explode(',', $localBook->author) : ($volume['authors'] ?? ['Unknown']),
-            'description'   => $volume['description'] ?? 'No description available.',
-            'thumbnail'     => $volume['imageLinks']['thumbnail'] ?? 'https://dummyimage.com/150x200/cccccc/000000&text=No+Image',
-            'publisher'     => $localBook->publisher ?? ($volume['publisher'] ?? 'Unknown'),
-            'publishedDate' => $localBook->published_date ?? ($volume['publishedDate'] ?? 'Unknown'),
-            'language'      => optional($localBook?->language)->name ?? ($volume['language'] ?? 'Unknown'),
-            'category'      => optional($localBook?->type)->name ?? ($volume['categories'][0] ?? 'Unknown'),
-            'id'            => $id,
-        ];
-
-
-        return view('books.show', compact('book', 'localBook'));
+    if (empty($data['items'][0])) {
+        abort(404, 'Book not found');
     }
+
+    $volume = $data['items'][0]['volumeInfo'];
+
+    // Try to find the local book from DB WITH RELATIONSHIPS
+    $localBook = null;
+    if ($id) {
+        $localBook = Book::with(['type', 'language'])->find($id);
+    } else {
+        $localBook = Book::with(['type', 'language'])->where('isbn', $isbn)->first();
+    }
+
+    // Debug: Check if relationships are loaded
+    if ($localBook) {
+        \Log::info('Book Type:', [
+            'has_type' => !is_null($localBook->type),
+            'type_name' => $localBook->type ? $localBook->type->name : 'NO TYPE',
+            'book_type_id' => $localBook->book_type_id
+        ]);
+    }
+
+    // Prefer DB values if available - FIXED CATEGORY EXTRACTION
+    $book = [
+        'title'         => $localBook->title ?? $volume['title'] ?? 'No Title',
+        'authors'       => isset($localBook->author) ? explode(',', $localBook->author) : ($volume['authors'] ?? ['Unknown']),
+        'description'   => $volume['description'] ?? 'No description available.',
+        'thumbnail'     => $volume['imageLinks']['thumbnail'] ?? 'https://dummyimage.com/150x200/cccccc/000000&text=No+Image',
+        'publisher'     => $localBook->publisher ?? ($volume['publisher'] ?? 'Unknown'),
+        'publishedDate' => $localBook->published_date ?? ($volume['publishedDate'] ?? 'Unknown'),
+        'language'      => $localBook->language->name ?? ($volume['language'] ?? 'Unknown'),
+        'categories'    => $this->extractCategories($volume, $localBook), // Use the fixed method
+        'isbn'          => $isbn,
+        'id'            => $id,
+    ];
+
+    return view('books.show', compact('book', 'localBook'));
+}
+
+/**
+ * Extract categories properly
+ */
+private function extractCategories($volume, $localBook)
+{
+    // If local book has a type and it's loaded, use that
+    if ($localBook && $localBook->type) {
+        return [$localBook->type->name];
+    }
+    
+    // If API has categories, use them
+    if (!empty($volume['categories'])) {
+        return $volume['categories'];
+    }
+    
+    // Fallback
+    return ['General'];
+}
 
 public function search(Request $request)
 {

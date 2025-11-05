@@ -19,4 +19,17 @@ class Book extends Model
     {
         return $this->hasMany(Lending::class);
     }
+
+    // ✅ Add this
+    public function type()
+    {
+        // books.book_type_id -> book_types.id
+        return $this->belongsTo(\App\Models\BookType::class, 'book_type_id');
+    }
+
+    // (you likely already have this since language shows)
+    public function language()
+    {
+        return $this->belongsTo(\App\Models\Language::class, 'language_id');
+    }
 }
