@@ -12,8 +12,7 @@
                     Welcome to Oakwood Library
                 </h1>
                 <p class="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 max-w-3xl mx-auto">
-                    Discover thousands of books — from timeless classics to modern bestsellers. Start your reading journey
-                    today.
+                    Step into the world of stories, ideas, and imagination — where every book opens a new adventure.
                 </p>
 
                 {{-- Search Form --}}
