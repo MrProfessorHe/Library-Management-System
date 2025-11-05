@@ -2,77 +2,67 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use App\Models\User;
+use App\Models\Lending; // Add this import
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
     /**
      * Display the user's profile form.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\View\View
      */
     public function edit(Request $request): View
     {
         return view('profile.edit', [
-            'user' => $request->user(), // ✅ Intelephense will now recognize this
+            'user' => $request->user(),
         ]);
     }
 
     /**
      * Update the user's profile information.
-     *
-     * @param \App\Http\Requests\ProfileUpdateRequest $request
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
+                'required', 
+                'string', 
+                'lowercase', 
+                'email', 
+                'max:255', 
+                Rule::unique('users')->ignore($request->user()->id)
+            ],
+            'phone' => ['required', 'string', 'max:20'],
+            'address' => ['required', 'string', 'max:500'],
+        ]);
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $user = $request->user();
+        
+        // Update user fields
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->phone = $validated['phone'];
+        $user->address = $validated['address'];
+
+        // If email changed, reset verification
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**
      * Delete the user's account.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\RedirectResponse
      */
-
-    public function show(Request $request)
-    {
-        $user = $request->user();
-
-        // Total books borrowed by user
-        $booksBorrowedCount = \App\Models\Lending::where('user_id', $user->id)->count();
-
-        // Active rentals (currently borrowed)
-        $activeRentalsCount = \App\Models\Lending::where('user_id', $user->id)
-            ->whereNull('return_at')
-            ->count();
-
-        // Wishlist items (make sure User model has wishlist() relationship)
-
-        return view('profile.show', [
-            'user' => $user,
-            'booksBorrowedCount' => $booksBorrowedCount,
-            'activeRentalsCount' => $activeRentalsCount,
-        ]);
-    }
-
-
     public function destroy(Request $request): RedirectResponse
     {
         $request->validateWithBag('userDeletion', [
@@ -89,5 +79,28 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    /**
+     * Show user profile
+     */
+    public function show(Request $request)
+    {
+        $user = $request->user();
+
+        // Total books borrowed by user
+        $booksBorrowedCount = Lending::where('user_id', $user->id)->count();
+
+        // Active rentals (currently borrowed) - FIXED: Changed 'ending' to 'Lending'
+        $activeRentalsCount = Lending::where('user_id', $user->id)
+            ->where('status', 'approved')
+            ->whereNull('returned_at')
+            ->count();
+
+        return view('profile.show', [
+            'user' => $user,
+            'booksBorrowedCount' => $booksBorrowedCount,
+            'activeRentalsCount' => $activeRentalsCount,
+        ]);
     }
 }

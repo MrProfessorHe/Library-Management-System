@@ -15,17 +15,6 @@ class Book extends Model
         'quantity',
     ];
 
-    public function bookType()
-    {
-        return $this->belongsTo(BookType::class);
-    }
-
-    public function language()
-    {
-        return $this->belongsTo(Language::class);
-    }
-
-
     public function lendings()
     {
         return $this->hasMany(Lending::class);

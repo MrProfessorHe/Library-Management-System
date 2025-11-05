@@ -6,6 +6,17 @@
     <div class="bg-gray-100 dark:bg-gray-900 py-10">
         <div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 shadow-2xl rounded-2xl overflow-hidden">
 
+            <!-- Back Button -->
+            <div class="p-6 pb-0">
+                <a href="{{ url()->previous() }}" 
+                   class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 font-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    Back
+                </a>
+            </div>
+
             <!-- Profile Header -->
             <div class="p-6 md:p-8 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">

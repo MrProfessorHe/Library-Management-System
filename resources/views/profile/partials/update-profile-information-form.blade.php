@@ -1,4 +1,15 @@
 <section>
+    <!-- Back Button -->
+    <div class="mb-6">
+        <a href="{{ url()->previous() }}" 
+           class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 font-semibold">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+            Back
+        </a>
+    </div>
+
     <header>
         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
             {{ __('Profile Information') }}
@@ -17,20 +28,41 @@
         @csrf
         @method('patch')
 
+        <!-- Name Field (Read-only) -->
         <div>
             <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)"
-                required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+            <x-text-input 
+                id="name" 
+                name="name" 
+                type="text" 
+                class="mt-1 block w-full bg-gray-100 dark:bg-gray-700 cursor-not-allowed" 
+                :value="old('name', $user->name)"
+                readonly 
+                disabled
+            />
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {{ __('Name cannot be changed. Please contact administrator.') }}
+            </p>
         </div>
 
+        <!-- Email Field (Read-only) -->
         <div>
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
+            <x-text-input 
+                id="email" 
+                name="email" 
+                type="email" 
+                class="mt-1 block w-full bg-gray-100 dark:bg-gray-700 cursor-not-allowed" 
+                :value="old('email', $user->email)" 
+                readonly 
+                disabled
+            />
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {{ __('Email cannot be changed. Please contact administrator.') }}
+            </p>
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !$user->hasVerifiedEmail())
-                <div>
+                <div class="mt-4">
                     <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
                         {{ __('Your email address is unverified.') }}
 
@@ -49,20 +81,35 @@
             @endif
         </div>
 
-        <!-- Phone -->
+        <!-- Phone (Editable) -->
         <div>
             <x-input-label for="phone" :value="__('Phone')" />
-            <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full" :value="old('phone', $user->phone)" required autocomplete="tel" />
+            <x-text-input 
+                id="phone" 
+                name="phone" 
+                type="text" 
+                class="mt-1 block w-full" 
+                :value="old('phone', $user->phone)" 
+                required 
+                autocomplete="tel" 
+            />
             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
         </div>
 
-        <!-- Address -->
+        <!-- Address (Editable) -->
         <div>
             <x-input-label for="address" :value="__('Address')" />
-            <x-text-input id="address" name="address" type="text" class="mt-1 block w-full" :value="old('address', $user->address)" required autocomplete="street-address" />
+            <x-text-input 
+                id="address" 
+                name="address" 
+                type="text" 
+                class="mt-1 block w-full" 
+                :value="old('address', $user->address)" 
+                required 
+                autocomplete="street-address" 
+            />
             <x-input-error class="mt-2" :messages="$errors->get('address')" />
         </div>
-
 
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
