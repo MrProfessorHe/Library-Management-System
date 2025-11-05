@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Lending;
 use App\Models\Book;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -59,6 +60,12 @@ class LendingController extends Controller
     public function requestBorrow(Book $book)
     {
         $userId = Auth::id();
+        $user = Auth::user();
+
+        // Check if user account is blocked
+        if ($this->isUserBlocked($user)) {
+            return redirect()->back()->with('error', 'Your account has been blocked. Please contact administrator.');
+        }
 
         // Check for sufficient quantity before anything else
         if ($book->quantity < 1) {
@@ -74,6 +81,12 @@ class LendingController extends Controller
         if ($existing) {
             $statusMessage = $existing->status === 'pending' ? 'requested' : 'borrowed';
             return redirect()->back()->with('error', "You have already {$statusMessage} this book.");
+        }
+
+        // Check if user can borrow more books (respect max_books_allowed)
+        if (!$this->canUserBorrowMoreBooks($user)) {
+            $maxBooks = $user->max_books_allowed ?? 3;
+            return redirect()->back()->with('error', "You have reached your maximum borrowing limit of {$maxBooks} books.");
         }
 
         // Create a new request WITH dates
@@ -93,8 +106,19 @@ class LendingController extends Controller
      */
     public function approve(Lending $lending)
     {
+        $user = $lending->user;
+
         if ($lending->status !== 'pending') {
             return redirect()->back()->with('error', 'This request has already been handled.');
+        }
+
+        // Check if user account is blocked
+        if ($this->isUserBlocked($user)) {
+            $lending->update([
+                'status' => 'rejected',
+                'notes' => 'Auto-rejected: User account is blocked'
+            ]);
+            return redirect()->back()->with('error', 'Cannot approve request. User account is blocked.');
         }
 
         $book = $lending->book;
@@ -104,11 +128,21 @@ class LendingController extends Controller
             return redirect()->back()->with('error', 'No available copies. The request has been rejected.');
         }
 
+        // Check if user can borrow more books
+        if (!$this->canUserBorrowMoreBooks($user)) {
+            $lending->update([
+                'status' => 'rejected',
+                'notes' => 'Auto-rejected: User has reached borrowing limit'
+            ]);
+            $maxBooks = $user->max_books_allowed ?? 3;
+            return redirect()->back()->with('error', "User has reached maximum borrowing limit of {$maxBooks} books. Request rejected.");
+        }
+
         $lending->update([
             'status' => 'approved',
             'approved_at' => now(),
             'issued_at' => now(), // Ensure issued date is set
-            'return_at' => now()->addDays(7), // Set a 7-day return period
+            'return_at' => now()->addDays($user->max_days_allowed ?? 7), // Use user's max_days_allowed or default 7
         ]);
 
         $book->decrement('quantity');
@@ -125,8 +159,55 @@ class LendingController extends Controller
             return redirect()->back()->with('error', 'This request has already been handled.');
         }
 
-        $lending->update(['status' => 'rejected']);
+        $lending->update([
+            'status' => 'rejected',
+            'notes' => 'Rejected by admin'
+        ]);
 
         return redirect()->back()->with('success', 'Lending request rejected.');
+    }
+
+    /**
+     * Check if user account is blocked
+     */
+    private function isUserBlocked(User $user): bool
+    {
+        // Check both status field and blocked_at timestamp for redundancy
+        return $user->status === 'blocked' || $user->blocked_at !== null;
+    }
+
+    /**
+     * Check if user can borrow more books based on max_books_allowed
+     */
+    private function canUserBorrowMoreBooks(User $user): bool
+    {
+        $maxBooks = $user->max_books_allowed ?? 3; // Default to 3 if not set
+        
+        $currentBorrowedCount = Lending::where('user_id', $user->id)
+            ->where('status', 'approved')
+            ->whereNull('returned_at')
+            ->count();
+
+        return $currentBorrowedCount < $maxBooks;
+    }
+
+    /**
+     * Get blocked user message with details
+     */
+    private function getBlockedUserMessage(User $user): string
+    {
+        $message = 'Your account has been blocked.';
+        
+        if ($user->block_reason) {
+            $message .= " Reason: {$user->block_reason}";
+        }
+        
+        if ($user->blocked_at) {
+            $message .= " Blocked on: " . $user->blocked_at->format('M d, Y');
+        }
+        
+        $message .= ' Please contact administrator for assistance.';
+        
+        return $message;
     }
 }
