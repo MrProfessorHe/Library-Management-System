@@ -12,140 +12,173 @@
                     </span>
                 </a>
 
-                <!-- Nav links -->
-                <div class="hidden sm:flex space-x-6 items-center text-sm font-medium text-gray-600 dark:text-gray-300">
-                    <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
-                        {{ __('Home') }}
+            <!-- Nav links -->
+            <div class="hidden sm:flex space-x-6 items-center text-sm font-medium text-gray-600 dark:text-gray-300">
+                <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
+                    {{ __('Home') }}
+                </x-nav-link>
+
+                <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                    {{ __('Dashboard') }}
+                </x-nav-link>
+
+                @if(auth()->user() && (auth()->user()->role === 'admin' || auth()->user()->role === 'librarian'))
+                    <x-nav-link :href="route('books.insertBook')" :active="request()->routeIs('books.*')">
+                        {{ __('Manage Books') }}
                     </x-nav-link>
 
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+                    <x-nav-link :href="route('admin.lendings.index')" :active="request()->routeIs('admin.lendings.*')">
+                        {{ __('Manage Lendings') }}
                     </x-nav-link>
 
-                    @if(auth()->user() && (auth()->user()->role === 'admin' || auth()->user()->role === 'librarian'))
-                        <x-nav-link :href="route('books.insertBook')" :active="request()->routeIs('books.*')">
-                            {{ __('Manage Books') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.lendings.index')" :active="request()->routeIs('admin.lendings.*')">
-                            {{ __('Manage Lendings') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.fines.index')" :active="request()->routeIs('admin.fines.*')">
-                            {{ __('Manage Fines') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.fines.rules')" :active="request()->routeIs('admin.fines.rules')">
-                            {{ __('Fine Rules') }}
-                        </x-nav-link>
-                    @endif
+                    {{-- ✅ Fix: Only highlight Manage Fines (not Fine Rules) --}}
+                    <x-nav-link :href="route('admin.fines.index')"
+                        :active="request()->routeIs(
+                            'admin.fines.index',
+                            'admin.fines.user',
+                            'admin.fines.pay',
+                            'admin.fines.waive',
+                            'admin.fines.bulk-pay',
+                            'admin.fines.reminder',
+                            'admin.fines.report'
+                        )">
+                        {{ __('Manage Fines') }}
+                    </x-nav-link>
 
-                    @if(auth()->user() && auth()->user()->role === 'admin')
-                        <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
-                            {{ __('User Management') }}
-                        </x-nav-link>
-                    @endif
-                </div>
-            </div>
+                    {{-- ✅ Fix: Fine Rules highlight only its own routes --}}
+                    <x-nav-link :href="route('admin.fines.rules')"
+                        :active="request()->routeIs('admin.fines.rules','admin.fines.rules.*')">
+                        {{ __('Fine Rules') }}
+                    </x-nav-link>
+                @endif
 
-            <!-- Right section -->
-            <div class="hidden sm:flex items-center space-x-4">
-                @auth
-                    <x-dropdown align="right" width="48">
-                        <x-slot name="trigger">
-                            <button
-                                class="flex items-center text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white focus:outline-none">
-                                <span>{{ auth()->user()->name }}</span>
-                                <svg class="ms-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.5 7l4.5 4.5L14.5 7z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                        </x-slot>
-                        <x-slot name="content">
-                            <x-dropdown-link :href="route('profile.show')">
-                                {{ __('Profile') }}
-                            </x-dropdown-link>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault(); this.closest('form').submit();">
-                                    {{ __('Log Out') }}
-                                </x-dropdown-link>
-                            </form>
-                        </x-slot>
-                    </x-dropdown>
-                @else
-                    <a href="{{ route('login') }}"
-                        class="text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 transition">
-                        {{ __('Login') }}
-                    </a>
-                    <a href="{{ route('register') }}"
-                        class="text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 transition">
-                        {{ __('Register') }}
-                    </a>
-                @endauth
-            </div>
-
-            <!-- Mobile Hamburger -->
-            <div class="sm:hidden flex items-center">
-                <button @click="open = ! open" class="text-gray-600 dark:text-gray-300 focus:outline-none">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path :class="{ 'hidden': open }" stroke-linecap="round" stroke-linejoin="round"
-                            stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{ 'hidden': !open }" stroke-linecap="round" stroke-linejoin="round"
-                            stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+                @if(auth()->user() && auth()->user()->role === 'admin')
+                    <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                        {{ __('User Management') }}
+                    </x-nav-link>
+                @endif
             </div>
         </div>
-    </div>
 
-    <!-- Mobile Nav -->
-    <div :class="{ 'block': open, 'hidden': !open }"
-        class="sm:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-4 pt-4 pb-6 space-y-2 text-sm">
-        <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-            {{ __('Dashboard') }}
+        <!-- Right section -->
+        <div class="hidden sm:flex items-center space-x-4">
+            @auth
+                <x-dropdown align="right" width="48">
+                    <x-slot name="trigger">
+                        <button
+                            class="flex items-center text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white focus:outline-none">
+                            <span>{{ auth()->user()->name }}</span>
+                            <svg class="ms-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.5 7l4.5 4.5L14.5 7z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </x-slot>
+                    <x-slot name="content">
+                        <x-dropdown-link :href="route('profile.show')">
+                            {{ __('Profile') }}
+                        </x-dropdown-link>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <x-dropdown-link :href="route('logout')"
+                                onclick="event.preventDefault(); this.closest('form').submit();">
+                                {{ __('Log Out') }}
+                            </x-dropdown-link>
+                        </form>
+                    </x-slot>
+                </x-dropdown>
+            @else
+                <a href="{{ route('login') }}"
+                    class="text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 transition">
+                    {{ __('Login') }}
+                </a>
+                <a href="{{ route('register') }}"
+                    class="text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 transition">
+                    {{ __('Register') }}
+                </a>
+            @endauth
+        </div>
+
+        <!-- Mobile Hamburger -->
+        <div class="sm:hidden flex items-center">
+            <button @click="open = ! open" class="text-gray-600 dark:text-gray-300 focus:outline-none">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path :class="{ 'hidden': open }" stroke-linecap="round" stroke-linejoin="round"
+                        stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    <path :class="{ 'hidden': !open }" stroke-linecap="round" stroke-linejoin="round"
+                        stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Nav -->
+<div :class="{ 'block': open, 'hidden': !open }"
+    class="sm:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-4 pt-4 pb-6 space-y-2 text-sm">
+
+    <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+        {{ __('Dashboard') }}
+    </x-responsive-nav-link>
+
+    @if(auth()->user() && (auth()->user()->role === 'admin' || auth()->user()->role === 'librarian'))
+        <x-responsive-nav-link :href="route('books.insertBook')" :active="request()->routeIs('books.*')">
+            {{ __('Manage Books') }}
         </x-responsive-nav-link>
 
-        @if(auth()->user() && (auth()->user()->role === 'admin' || auth()->user()->role === 'librarian'))
-            <x-responsive-nav-link :href="route('books.insertBook')" :active="request()->routeIs('books.*')">
-                {{ __('Manage Books') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('admin.lendings.index')" :active="request()->routeIs('admin.lendings.*')">
-                {{ __('Manage Lendings') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('admin.fines.index')" :active="request()->routeIs('admin.fines.*')">
-                {{ __('Manage Fines') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('admin.fines.rules')" :active="request()->routeIs('admin.fines.rules')">
-                {{ __('Fine Rules') }}
-            </x-responsive-nav-link>
-        @endif
+        <x-responsive-nav-link :href="route('admin.lendings.index')" :active="request()->routeIs('admin.lendings.*')">
+            {{ __('Manage Lendings') }}
+        </x-responsive-nav-link>
 
-        @if(auth()->user() && auth()->user()->role === 'admin')
-            <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
-                {{ __('User Management') }}
-            </x-responsive-nav-link>
-        @endif
+        {{-- ✅ Manage Fines --}}
+        <x-responsive-nav-link :href="route('admin.fines.index')"
+            :active="request()->routeIs(
+                'admin.fines.index',
+                'admin.fines.user',
+                'admin.fines.pay',
+                'admin.fines.waive',
+                'admin.fines.bulk-pay',
+                'admin.fines.reminder',
+                'admin.fines.report'
+            )">
+            {{ __('Manage Fines') }}
+        </x-responsive-nav-link>
 
-        @auth
-            <x-responsive-nav-link :href="route('profile.show')">
-                {{ __('Profile') }}
+        {{-- ✅ Fine Rules --}}
+        <x-responsive-nav-link :href="route('admin.fines.rules')"
+            :active="request()->routeIs('admin.fines.rules','admin.fines.rules.*')">
+            {{ __('Fine Rules') }}
+        </x-responsive-nav-link>
+    @endif
+
+    @if(auth()->user() && auth()->user()->role === 'admin')
+        <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+            {{ __('User Management') }}
+        </x-responsive-nav-link>
+    @endif
+
+    @auth
+        <x-responsive-nav-link :href="route('profile.show')">
+            {{ __('Profile') }}
+        </x-responsive-nav-link>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <x-responsive-nav-link :href="route('logout')"
+                onclick="event.preventDefault(); this.closest('form').submit();">
+                {{ __('Log Out') }}
             </x-responsive-nav-link>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <x-responsive-nav-link :href="route('logout')"
-                    onclick="event.preventDefault(); this.closest('form').submit();">
-                    {{ __('Log Out') }}
-                </x-responsive-nav-link>
-            </form>
-        @else
-            <x-responsive-nav-link :href="route('login')">
-                {{ __('Login') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('register')">
-                {{ __('Register') }}
-            </x-responsive-nav-link>
-        @endauth
-    </div>
+        </form>
+    @else
+        <x-responsive-nav-link :href="route('login')">
+            {{ __('Login') }}
+        </x-responsive-nav-link>
+        <x-responsive-nav-link :href="route('register')">
+            {{ __('Register') }}
+        </x-responsive-nav-link>
+    @endauth
+</div>
+
 </nav>
 
-<!-- ✅ Spacer to prevent navbar overlap -->
+<!-- Spacer -->
+
 <div class="h-16"></div>
