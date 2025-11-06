@@ -1,3 +1,8 @@
+@php
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
+@endphp
+
 @extends('layouts.app')
 
 @section('title', 'Dashboard')
@@ -6,6 +11,7 @@
 <div class="bg-gray-100 dark:bg-gray-900 py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         @if(auth()->user()->role === 'admin')
+            {{-- ===== Admin Dashboard ===== --}}
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 md:p-8">
                 <div class="flex items-center justify-between mb-6">
                     <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Members Overview</h1>
@@ -65,70 +71,159 @@
                 </div>
             </div>
         @else
+            {{-- ===== User Dashboard ===== --}}
             <div class="space-y-6">
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 md:p-8">
                     <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">My Dashboard</h1>
-                    
+
                     @php
-                        // Get only last 3 months lendings sorted by latest first
-                        $recentLendings = isset($lendings) ? $lendings->where('created_at', '>=', now()->subMonths(3))->sortByDesc('created_at') : collect();
-                        
-                        // Filter out returned books from recent lendings for better UX
-                        $activeLendings = $recentLendings->where('status', '!=', 'returned');
+                        $recentLendings  = isset($lendings) ? $lendings->where('created_at', '>=', now()->subMonths(3))->sortByDesc('created_at') : collect();
+                        $activeLendings  = $recentLendings->where('status', '!=', 'returned');
+                        $booksOnHand = isset($lendings)
+                            ? $lendings->where('status', 'approved')->whereNull('returned_at')->sortBy('return_at')
+                            : collect();
                     @endphp
-                    
+
+                    {{-- Active Lendings --}}
                     @if($activeLendings->count() > 0)
                         <div class="mb-8">
                             <div class="flex items-center justify-between mb-4">
                                 <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">My Active Lendings</h2>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">
-                                    Last 3 months
-                                </span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Last 3 months</span>
                             </div>
                             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                                 @foreach($activeLendings as $lending)
                                     <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 hover:shadow-md transition-shadow">
-                                        <div class="flex justify-between items-start">
-                                            <div class="flex-1">
-                                                <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">{{ $lending->book->title }}</h3>
-                                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                                    Status: 
-                                                    @if($lending->status === 'pending')
-                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                                                            Pending
+                                        <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2 truncate">{{ $lending->book->title }}</h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Status:
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                                {{ $lending->status === 'approved' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                                   ($lending->status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                                                   'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200') }}">
+                                                {{ ucfirst($lending->status) }}
+                                            </span>
+                                        </p>
+                                        @if($lending->issued_at)
+                                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Issued: {{ $lending->issued_at->format('M d, Y') }}</p>
+                                        @endif
+                                        @if($lending->return_at && $lending->status !== 'returned')
+                                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Due Date: {{ $lending->return_at->format('M d, Y') }}</p>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- 📚 Books on Hand --}}
+                    @if($booksOnHand->count() > 0)
+                        <div class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Books on Hand</h2>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">{{ $booksOnHand->count() }} {{ Str::plural('book', $booksOnHand->count()) }}</span>
+                            </div>
+
+                            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                @foreach($booksOnHand as $lending)
+                                    @php
+                                        $due = $lending->return_at;
+                                        $daysLeft = $due ? now()->startOfDay()->diffInDays($due->copy()->startOfDay(), false) : null;
+                                        $isOverdue = isset($daysLeft) && $daysLeft < 0;
+                                    @endphp
+
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 hover:shadow-md transition-shadow">
+                                        <div class="flex items-start gap-3">
+                                            {{-- Cover --}}
+                                            <div class="w-14 h-20 bg-gray-100 dark:bg-gray-700 rounded overflow-hidden flex-shrink-0">
+                                                @if(optional($lending->book)->cover_image)
+                                                    <img src="{{ $lending->book->cover_image }}" alt="{{ $lending->book->title }}" class="w-full h-full object-cover">
+                                                @else
+                                                    <div class="w-full h-full flex items-center justify-center text-[10px] text-gray-400">No Image</div>
+                                                @endif
+                                            </div>
+
+                                            {{-- Info --}}
+                                            <div class="flex-1 min-w-0">
+                                                <h3 class="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                                                    {{ optional($lending->book)->title ?? 'Unknown Title' }}
+                                                </h3>
+
+                                                @if($due)
+                                                    <p class="text-sm mt-1">
+                                                        <span class="text-gray-600 dark:text-gray-400">Due:</span>
+                                                        <span class="{{ $isOverdue ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-gray-800 dark:text-gray-200' }}">
+                                                            {{ $due->format('M d, Y') }}
                                                         </span>
-                                                    @elseif($lending->status === 'approved')
-                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                                            Approved
-                                                        </span>
-                                                    @elseif($lending->status === 'returned')
-                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                                            Returned
-                                                        </span>
-                                                    @else
-                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                                                            {{ ucfirst($lending->status) }}
-                                                        </span>
+                                                    </p>
+
+                                                    <p class="text-xs mt-1">
+                                                        @if($daysLeft < 0)
+                                                            @php $n = abs($daysLeft); @endphp
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                                                                Overdue by {{ $n }} {{ Str::plural('day', $n) }}
+                                                            </span>
+                                                        @elseif($daysLeft === 0)
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                                                Due today
+                                                            </span>
+                                                        @else
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                                                {{ $daysLeft }} {{ Str::plural('day', $daysLeft) }} left
+                                                            </span>
+                                                        @endif
+                                                    </p>
+                                                @endif
+
+                                                {{-- Quick Actions --}}
+                                                <div class="mt-3 flex flex-wrap gap-2">
+                                                    @if(Route::has('lendings.renew'))
+                                                        <form method="POST" action="{{ route('lendings.renew', ['lending' => $lending->id]) }}">
+                                                            @csrf
+                                                            <button
+                                                                class="px-3 py-1.5 rounded-md text-sm font-medium
+                                                                    border border-blue-500 text-blue-700 bg-white
+                                                                    hover:bg-blue-50 active:bg-blue-100
+                                                                    dark:border-blue-400 dark:text-blue-200 dark:bg-transparent
+                                                                    dark:hover:bg-blue-400/10 dark:active:bg-blue-400/20
+                                                                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+                                                                    focus-visible:ring-offset-2 focus-visible:ring-offset-white
+                                                                    dark:focus-visible:ring-offset-gray-800 transition">
+                                                                Renew
+                                                            </button>
+                                                        </form>
                                                     @endif
-                                                </p>
-                                                @if($lending->issued_at)
-                                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                                        Issued: {{ $lending->issued_at->format('M d, Y') }}
-                                                    </p>
-                                                @endif
-                                                @if($lending->return_at && $lending->status !== 'returned')
-                                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                                        Due Date: {{ $lending->return_at->format('M d, Y') }}
-                                                    </p>
-                                                @endif
-                                                @if($lending->returned_at)
-                                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                                        Returned: {{ $lending->returned_at->format('M d, Y') }}
-                                                    </p>
-                                                @endif
-                                                <p class="text-xs text-gray-500 dark:text-gray-400">
-                                                    Requested: {{ $lending->created_at->format('M d, Y') }}
-                                                </p>
+
+                                                    @if(Route::has('lendings.return'))
+                                                        <form method="POST" action="{{ route('lendings.return', ['lending' => $lending->id]) }}">
+                                                            @csrf
+                                                            <button
+                                                                class="px-3 py-1.5 rounded-md text-sm font-medium
+                                                                    border border-gray-500 text-gray-800 bg-white
+                                                                    hover:bg-gray-50 active:bg-gray-100
+                                                                    dark:border-gray-400 dark:text-gray-100 dark:bg-transparent
+                                                                    dark:hover:bg-gray-700/50 dark:active:bg-gray-700/70
+                                                                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400
+                                                                    focus-visible:ring-offset-2 focus-visible:ring-offset-white
+                                                                    dark:focus-visible:ring-offset-gray-800 transition">
+                                                                Mark as Returned
+                                                            </button>
+                                                        </form>
+                                                    @endif
+
+                                                    @if(optional($lending->book)->isbn)
+                                                        <a href="{{ route('books.external.show', ['isbn' => $lending->book->isbn, 'id' => $lending->book->id ?? null]) }}"
+                                                        class="px-3 py-1.5 rounded-md text-sm font-medium
+                                                                border border-violet-500 text-violet-700 bg-white
+                                                                hover:bg-violet-50 active:bg-violet-100
+                                                                dark:border-violet-400 dark:text-violet-200 dark:bg-transparent
+                                                                dark:hover:bg-violet-400/10 dark:active:bg-violet-400/20
+                                                                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500
+                                                                focus-visible:ring-offset-2 focus-visible:ring-offset-white
+                                                                dark:focus-visible:ring-offset-gray-800 transition">
+                                                            View
+                                                        </a>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -137,9 +232,8 @@
                         </div>
                     @endif
 
-                    {{-- Only show ACTIVE overdue books (not returned and past due date) --}}
+                    {{-- Overdue Books --}}
                     @php
-                        // Calculate active overdue books for the current user
                         $activeOverdue = isset($lendings) ? $lendings->where('status', 'approved')
                                                             ->whereNull('returned_at')
                                                             ->where('return_at', '<', now())
@@ -151,60 +245,21 @@
                             <h2 class="text-xl font-semibold mb-4 text-red-600 dark:text-red-400">Overdue Books</h2>
                             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                                 @foreach($activeOverdue as $lending)
-                                    @php
-                                        // Calculate days overdue - FIXED: Use floor() for whole days
-                                        $daysOverdue = (int)floor($lending->return_at->diffInDays(now()));
-                                        
-                                        // Get the latest active fine rule and calculate actual fine
-                                        $fineRule = App\Models\FineRule::where('is_active', true)
-                                                                      ->orderBy('created_at', 'desc')
-                                                                      ->first();
-                                        
-                                        // Check if there's already a paid fine for this lending
-                                        $existingPaidFine = $lending->fines()->where('status', 'paid')->exists();
-                                        
-                                        // Calculate fine using your actual fine rules
-                                        if ($fineRule && !$existingPaidFine) {
-                                            $fineAmount = $fineRule->calculateFine($daysOverdue);
-                                        } else {
-                                            $fineAmount = 0; // No fine if already paid or no rule
-                                        }
-                                    @endphp
                                     <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
-                                        <div class="flex justify-between items-start">
-                                            <div class="flex-1">
-                                                <h3 class="font-semibold text-red-800 dark:text-red-200 mb-2">{{ $lending->book->title }}</h3>
-                                                <p class="text-sm text-red-600 dark:text-red-400 mb-1">
-                                                    Due: {{ $lending->return_at->format('M d, Y') }}
-                                                </p>
-                                                <p class="text-sm text-red-600 dark:text-red-400 mb-2">
-                                                    Days Overdue: {{ $daysOverdue }}
-                                                </p>
-                                                @if($fineAmount > 0 && !$existingPaidFine)
-                                                    <p class="text-sm font-semibold text-red-700 dark:text-red-300 mb-2">
-                                                        Fine: ₹{{ number_format($fineAmount, 2) }}
-                                                    </p>
-                                                    <p class="text-xs text-red-600 dark:text-red-400 italic">
-                                                        Please return the book to avoid additional fines
-                                                    </p>
-                                                @elseif($existingPaidFine)
-                                                    <p class="text-sm font-semibold text-green-600 dark:text-green-400 mb-2">
-                                                        Fine Paid ✓
-                                                    </p>
-                                                @else
-                                                    <p class="text-sm text-red-600 dark:text-red-400 mb-2">
-                                                        No fine applicable
-                                                    </p>
-                                                @endif
-                                            </div>
-                                        </div>
+                                        <h3 class="font-semibold text-red-800 dark:text-red-200 mb-2">{{ $lending->book->title }}</h3>
+                                        <p class="text-sm text-red-600 dark:text-red-400 mb-1">
+                                            Due: {{ $lending->return_at->format('M d, Y') }}
+                                        </p>
+                                        <p class="text-sm text-red-600 dark:text-red-400 mb-1">
+                                            Days Overdue: {{ floor($lending->return_at->diffInDays(now())) }}
+                                        </p>
                                     </div>
                                 @endforeach
                             </div>
                         </div>
                     @endif
 
-                    {{-- Show returned books separately --}}
+                    {{-- Recently Returned --}}
                     @php
                         $returnedBooks = isset($lendings) ? $lendings->where('status', 'returned')
                                                          ->where('created_at', '>=', now()->subMonths(3))
@@ -213,48 +268,20 @@
 
                     @if($returnedBooks->count() > 0)
                         <div class="mb-8">
-                            <div class="flex items-center justify-between mb-4">
-                                <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Recently Returned Books</h2>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">
-                                    Last 3 months
-                                </span>
-                            </div>
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Recently Returned Books</h2>
                             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                                 @foreach($returnedBooks as $lending)
                                     <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
-                                        <div class="flex justify-between items-start">
-                                            <div class="flex-1">
-                                                <h3 class="font-semibold text-green-800 dark:text-green-200 mb-2">{{ $lending->book->title }}</h3>
-                                                <p class="text-sm text-green-600 dark:text-green-400 mb-1">
-                                                    Status: <span class="font-semibold">Returned</span>
-                                                </p>
-                                                @if($lending->issued_at)
-                                                    <p class="text-sm text-green-600 dark:text-green-400 mb-1">
-                                                        Issued: {{ $lending->issued_at->format('M d, Y') }}
-                                                    </p>
-                                                @endif
-                                                @if($lending->returned_at)
-                                                    <p class="text-sm text-green-600 dark:text-green-400 mb-1">
-                                                        Returned: {{ $lending->returned_at->format('M d, Y') }}
-                                                    </p>
-                                                @endif
-                                                {{-- FIXED: Use floor() to get whole days --}}
-                                                <p class="text-xs text-green-500 dark:text-green-400">
-                                                    @if($lending->issued_at && $lending->returned_at)
-                                                        Borrowed for {{ (int)floor($lending->issued_at->diffInDays($lending->returned_at)) }} days
-                                                    @else
-                                                        Borrowed for N/A days
-                                                    @endif
-                                                </p>
-                                            </div>
-                                        </div>
+                                        <h3 class="font-semibold text-green-800 dark:text-green-200 mb-2">{{ $lending->book->title }}</h3>
+                                        <p class="text-sm text-green-600 dark:text-green-400 mb-1">Returned: {{ $lending->returned_at->format('M d, Y') }}</p>
                                     </div>
                                 @endforeach
                             </div>
                         </div>
                     @endif
 
-                    @if($activeLendings->count() === 0 && $activeOverdue->count() === 0 && $returnedBooks->count() === 0)
+                    {{-- Empty State --}}
+                    @if($activeLendings->isEmpty() && $booksOnHand->isEmpty() && $activeOverdue->isEmpty() && $returnedBooks->isEmpty())
                         <div class="text-center py-12">
                             <div class="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
                                 <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
