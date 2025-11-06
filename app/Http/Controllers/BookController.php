@@ -18,43 +18,122 @@ class BookController extends Controller
 
 
     public function showExternal($isbn, $id = null)
-    {
-        $response = Http::get("https://www.googleapis.com/books/v1/volumes", [
-            'q' => 'isbn:' . $isbn,
-        ]);
+{
+    // Fetch by ISBN (you can pass an API key if you have one)
+    $response = Http::get("https://www.googleapis.com/books/v1/volumes", [
+        'q'         => 'isbn:' . $isbn,
+        'maxResults'=> 1,
+        // 'key'    => env('GOOGLE_BOOKS_API_KEY'), // optional
+    ]);
 
-        $data = $response->json();
+    $data = $response->json();
+    $item = $data['items'][0] ?? null;
 
-        if (empty($data['items'][0])) {
-            abort(404, 'Book not found');
-        }
-
-        $volume = $data['items'][0]['volumeInfo'];
-
-        // Try to find the local book from DB
-        $localBook = null;
-        if ($id) {
-            $localBook = Book::find($id);
-        } else {
-            $localBook = Book::where('isbn', $isbn)->first();
-        }
-
-        // Prefer DB values if available
-        $book = [
-            'title'         => $localBook->title ?? $volume['title'] ?? 'No Title',
-            'authors'       => isset($localBook->author) ? explode(',', $localBook->author) : ($volume['authors'] ?? ['Unknown']),
-            'description'   => $volume['description'] ?? 'No description available.',
-            'thumbnail'     => $volume['imageLinks']['thumbnail'] ?? 'https://dummyimage.com/150x200/cccccc/000000&text=No+Image',
-            'publisher'     => $localBook->publisher ?? ($volume['publisher'] ?? 'Unknown'),
-            'publishedDate' => $localBook->published_date ?? ($volume['publishedDate'] ?? 'Unknown'),
-            'language'      => optional($localBook?->language)->name ?? ($volume['language'] ?? 'Unknown'),
-            'category'      => optional($localBook?->type)->name ?? ($volume['categories'][0] ?? 'Unknown'),
-            'id'            => $id,
-        ];
-
-
-        return view('books.show', compact('book', 'localBook'));
+    // Try to find the local book from DB (id from route or by isbn)
+    $localBook = null;
+    if ($id) {
+        $localBook = Book::find($id);
+    } else {
+        $localBook = Book::where('isbn', $isbn)->first();
     }
+
+    if (!$item) {
+        // If Google didn’t return anything, at least render local book if exists
+        if ($localBook) {
+            $book = [
+                'id'            => null,
+                'googleId'      => null,
+                'title'         => $localBook->title ?? 'No Title',
+                'authors'       => isset($localBook->author) ? array_map('trim', explode(',', $localBook->author)) : ['Unknown'],
+                'description'   => 'No description available.',
+                'thumbnail'     => 'https://dummyimage.com/300x420/cccccc/000000&text=No+Image',
+                'publisher'     => $localBook->publisher ?? 'Unknown',
+                'publishedDate' => $localBook->published_date ?? 'Unknown',
+                'language'      => optional($localBook?->language)->name ?? 'Unknown',
+                'categories'    => [$localBook?->type?->name ?? 'Unknown'],
+                'averageRating' => null,
+                'ratingsCount'  => null,
+                'previewLink'   => null,
+                'infoLink'      => null,
+                'isbn'          => $localBook->isbn ?? null, // fallback from DB
+            ];
+            return view('books.show', compact('book', 'localBook'))
+                   ->with('error', 'Could not fetch extra data from Google Books.');
+        }
+
+        abort(404, 'Book not found');
+    }
+
+    $volume      = $item;
+    $volumeInfo  = $item['volumeInfo'] ?? [];
+    $imageLinks  = $volumeInfo['imageLinks'] ?? [];
+
+    // ✅ Extract a clean ISBN (ISBN_13 preferred, then ISBN_10)
+    $isbnClean = $this->extractIsbn($volumeInfo['industryIdentifiers'] ?? []) ?: ($localBook->isbn ?? null);
+
+    // Map unified $book array
+    $book = [
+        'id'            => $volume['id'] ?? null,                      // Google volume ID
+        'googleId'      => $volume['id'] ?? null,
+        'title'         => $localBook->title ?? ($volumeInfo['title'] ?? 'No Title'),
+        'authors'       => isset($localBook->author)
+                            ? array_map('trim', explode(',', $localBook->author))
+                            : ($volumeInfo['authors'] ?? ['Unknown']),
+        'description'   => $volumeInfo['description'] ?? 'No description available.',
+        'thumbnail'     => $imageLinks['thumbnail']
+                            ?? $imageLinks['smallThumbnail']
+                            ?? 'https://dummyimage.com/300x420/cccccc/000000&text=No+Image',
+        'publisher'     => $localBook->publisher ?? ($volumeInfo['publisher'] ?? 'Unknown'),
+        'publishedDate' => $localBook->published_date ?? ($volumeInfo['publishedDate'] ?? 'Unknown'),
+        'language'      => optional($localBook?->language)->name ?? ($volumeInfo['language'] ?? 'Unknown'),
+        'categories'    => $volumeInfo['categories'] ?? (isset($localBook->type) ? [$localBook->type->name] : []),
+        'averageRating' => $volumeInfo['averageRating'] ?? null,
+        'ratingsCount'  => $volumeInfo['ratingsCount'] ?? null,
+        'previewLink'   => $volumeInfo['previewLink'] ?? null,
+        'infoLink'      => $volumeInfo['infoLink'] ?? null,
+        'isbn'          => $isbnClean, // <-- IMPORTANT
+    ];
+
+    return view('books.show', compact('book', 'localBook'));
+}
+
+/**
+ * Extracts a normalized ISBN from Google's industryIdentifiers array.
+ * Prefers ISBN_13, falls back to ISBN_10, else tries to salvage a 10/13 char value.
+ */
+private function extractIsbn(array $industryIdentifiers): ?string
+{
+    if (empty($industryIdentifiers)) {
+        return null;
+    }
+
+    $clean = function ($val) {
+        return preg_replace('/[^0-9Xx]/', '', (string) $val); // allow X/x for ISBN-10
+    };
+
+    // Prefer ISBN_13
+    foreach ($industryIdentifiers as $id) {
+        if (strtoupper($id['type'] ?? '') === 'ISBN_13' && !empty($id['identifier'])) {
+            return $clean($id['identifier']);
+        }
+    }
+    // Then ISBN_10
+    foreach ($industryIdentifiers as $id) {
+        if (strtoupper($id['type'] ?? '') === 'ISBN_10' && !empty($id['identifier'])) {
+            return $clean($id['identifier']);
+        }
+    }
+    // Fallback: any 10/13-length identifier
+    foreach ($industryIdentifiers as $id) {
+        if (!empty($id['identifier'])) {
+            $guess = $clean($id['identifier']);
+            if (strlen($guess) === 13 || strlen($guess) === 10) {
+                return $guess;
+            }
+        }
+    }
+    return null;
+}
 
 public function search(Request $request)
 {

@@ -113,12 +113,18 @@
                         </div>
 
                         {{-- Desktop/Tablet: horizontal carousel with snap - smaller cards --}}
-                        <div class="hidden md:block relative group">
+                        <div class="hidden md:block relative group/slider">
                             {{-- Left --}}
-                            <button onclick="scrollToLeft('{{ $category['id'] }}')" aria-label="Scroll left"
-                                    class="hidden lg:flex group-hover:flex items-center justify-center absolute left-2 top-1/2 -translate-y-1/2 z-10
-                                    bg-blue-200 dark:bg-blue-800 hover:bg-blue-300 dark:hover:bg-blue-700
-                                    text-blue-700 dark:text-blue-300 shadow-md rounded-full w-9 h-9 transition duration-200">
+                            <button
+                                onclick="scrollToLeft('{{ $category['id'] }}')"
+                                aria-label="Scroll left"
+                                class="pointer-events-none opacity-0 group-hover/slider:opacity-100 group-hover/slider:pointer-events-auto
+                                       focus:opacity-100 focus:pointer-events-auto
+                                       absolute left-2 top-1/2 -translate-y-1/2 z-10
+                                       rounded-full w-10 h-10 grid place-items-center
+                                       bg-white/90 text-blue-600 shadow-md ring-1 ring-blue-200
+                                       hover:bg-white dark:bg-gray-900/80 dark:text-blue-300 dark:ring-blue-700
+                                       transition duration-200">
                                 ‹
                             </button>
 
@@ -163,12 +169,22 @@
                             </div>
 
                             {{-- Right --}}
-                            <button onclick="scrollToRight('{{ $category['id'] }}')" aria-label="Scroll right"
-                                    class="hidden lg:flex group-hover:flex items-center justify-center absolute right-2 top-1/2 -translate-y-1/2 z-10
-                                    bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600
-                                    text-white shadow-md rounded-full w-9 h-9 transition duration-200">
+                            <button
+                                onclick="scrollToRight('{{ $category['id'] }}')"
+                                aria-label="Scroll right"
+                                class="pointer-events-none opacity-0 group-hover/slider:opacity-100 group-hover/slider:pointer-events-auto
+                                       focus:opacity-100 focus:pointer-events-auto
+                                       absolute right-2 top-1/2 -translate-y-1/2 z-10
+                                       rounded-full w-10 h-10 grid place-items-center
+                                       bg-white/90 text-blue-600 shadow-md ring-1 ring-blue-200
+                                       hover:bg-white dark:bg-gray-900/80 dark:text-blue-300 dark:ring-blue-700
+                                       transition duration-200">
                                 ›
                             </button>
+
+                            {{-- Edge fades (visual hint to scroll) --}}
+                            <div class="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-white dark:from-gray-800 to-transparent"></div>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white dark:from-gray-800 to-transparent"></div>
                         </div>
                     </section>
                 @endforeach
@@ -203,65 +219,65 @@
                     <li><a href="#" class="hover:text-blue-400 transition">Privacy Policy</a></li>
                 </ul>
             </div>
-                <div>
-                    <h4 id="contact-heading" class="text-lg font-semibold text-white mb-3">Contact Us</h4>
 
-                    <address class="not-italic text-sm space-y-1 text-gray-300">
-                        <p class="flex items-start gap-2">
+            <div>
+                <h4 id="contact-heading" class="text-lg font-semibold text-white mb-3">Contact Us</h4>
+
+                <address class="not-italic text-sm space-y-1 text-gray-300">
+                    <p class="flex items-start gap-2">
                         <span class="mt-[2px]">📍</span>
                         <span>Oakwood Library, Kerala, India</span>
-                        </p>
-                        <p class="flex items-start gap-2">
+                    </p>
+                    <p class="flex items-start gap-2">
                         <span class="mt-[2px]">📧</span>
                         <a href="mailto:support@oakwoodlibrary.com"
-                            class="hover:text-blue-400 transition underline-offset-2 hover:underline">
+                           class="hover:text-blue-400 transition underline-offset-2 hover:underline">
                             support@oakwoodlibrary.com
                         </a>
-                        </p>
-                        <p class="flex items-start gap-2">
+                    </p>
+                    <p class="flex items-start gap-2">
                         <span class="mt-[2px]">📞</span>
                         <a href="tel:+919876543210"
-                            class="hover:text-blue-400 transition underline-offset-2 hover:underline">
+                           class="hover:text-blue-400 transition underline-offset-2 hover:underline">
                             +91 98765 43210
                         </a>
-                        </p>
-                    </address>
+                    </p>
+                </address>
 
-                    <ul class="mt-4 flex items-center gap-3" aria-label="Social media">
-                        <!-- Facebook -->
-                        <li>
+                <ul class="mt-4 flex items-center gap-3" aria-label="Social media">
+                    <!-- Facebook -->
+                    <li>
                         <a href="#" target="_blank" rel="noopener noreferrer"
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-gray-300 hover:text-blue-400 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                            aria-label="Facebook" title="Facebook">
+                           class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-gray-300 hover:text-blue-400 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                           aria-label="Facebook" title="Facebook">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="h-5 w-5" viewBox="0 0 24 24">
-                            <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 5 3.657 9.128 8.438 9.878v-6.987H7.898v-2.89h2.54V9.797c0-2.507 1.493-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.772-1.63 1.562v1.876h2.773l-.443 2.89h-2.33V21.88C18.343 21.128 22 17 22 12z"/>
+                                <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 5 3.657 9.128 8.438 9.878v-6.987H7.898v-2.89h2.54V9.797c0-2.507 1.493-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.772-1.63 1.562v1.876h2.773l-.443 2.89h-2.33V21.88C18.343 21.128 22 17 22 12z"/>
                             </svg>
                         </a>
-                        </li>
+                    </li>
 
-                        <!-- Twitter/X -->
-                        <li>
+                    <!-- Twitter/X -->
+                    <li>
                         <a href="#" target="_blank" rel="noopener noreferrer"
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-gray-300 hover:text-blue-400 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                            aria-label="Twitter" title="Twitter">
+                           class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-gray-300 hover:text-blue-400 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                           aria-label="Twitter" title="Twitter">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="h-5 w-5" viewBox="0 0 24 24">
-                            <path d="M19.633 7.997c.013.177.013.355.013.532 0 5.425-4.13 11.68-11.68 11.68-2.323 0-4.482-.678-6.298-1.844.323.038.633.05.968.05a8.228 8.228 0 0 0 5.102-1.757A4.114 4.114 0 0 1 4.48 13.7a5.189 5.189 0 0 0 .775.064c.37 0 .738-.05 1.084-.138a4.108 4.108 0 0 1-3.293-4.03v-.05a4.144 4.144 0 0 0 1.858.52A4.11 4.11 0 0 1 3.58 7.21a11.66 11.66 0 0 0 8.462 4.29 4.64 4.64 0 0 1-.102-.944A4.109 4.109 0 0 1 16.05 6a8.077 8.077 0 0 0 2.605-.995 4.1 4.1 0 0 1-1.806 2.27 8.228 8.228 0 0 0 2.36-.63 8.86 8.86 0 0 1-2.576 2.352z"/>
+                                <path d="M19.633 7.997c.013.177.013.355.013.532 0 5.425-4.13 11.68-11.68 11.68-2.323 0-4.482-.678-6.298-1.844.323.038.633.05.968.05a8.228 8.228 0 0 0 5.102-1.757A4.114 4.114 0 0 1 4.48 13.7a5.189 5.189 0 0 0 .775.064c.37 0 .738-.05 1.084-.138a4.108 4.108 0 0 1-3.293-4.03v-.05a4.144 4.144 0 0 0 1.858.52A4.11 4.11 0 0 1 3.58 7.21a11.66 11.66 0 0 0 8.462 4.29 4.64 4.64 0 0 1-.102-.944A4.109 4.109 0 0 1 16.05 6a8.077 8.077 0 0 0 2.605-.995 4.1 4.1 0 0 1-1.806 2.27 8.228 8.228 0 0 0 2.36-.63 8.86 8.86 0 0 1-2.576 2.352z"/>
                             </svg>
                         </a>
-                        </li>
+                    </li>
 
-                        <!-- Instagram -->
-                        <li>
+                    <!-- Instagram -->
+                    <li>
                         <a href="#" target="_blank" rel="noopener noreferrer"
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-gray-300 hover:text-blue-400 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                            aria-label="Instagram" title="Instagram">
+                           class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-gray-300 hover:text-blue-400 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                           aria-label="Instagram" title="Instagram">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="h-5 w-5" viewBox="0 0 24 24">
-                            <path d="M7 2C4.243 2 2 4.243 2 7v10c0 2.757 2.243 5 5 5h10c2.757 0 5-2.243 5-5V7c0-2.757-2.243-5-5-5H7zm10 2c1.654 0 3 1.346 3 3v10c0 1.654-1.346 3-3 3H7c-1.654 0-3-1.346-3-3V7c0-1.654 1.346-3 3-3h10zM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm4.5-.75a1.25 1.25 0 1 0 0-2.5 1.25 1.25 0 0 0 0 2.5z"/>
+                                <path d="M7 2C4.243 2 2 4.243 2 7v10c0 2.757 2.243 5 5 5h10c2.757 0 5-2.243 5-5V7c0-2.757-2.243-5-5-5H7zm10 2c1.654 0 3 1.346 3 3v10c0 1.654-1.346 3-3 3H7c-1.654 0-3-1.346-3-3V7c0-1.654 1.346-3 3-3h10zM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm4.5-.75a1.25 1.25 0 1 0 0-2.5 1.25 1.25 0 0 0 0 2.5z"/>
                             </svg>
                         </a>
-                        </li>
-                    </ul>
-                </div>
+                    </li>
+                </ul>
             </div>
 
         <div class="border-t border-gray-800 dark:border-gray-700 py-4 text-center text-sm text-gray-400">
@@ -300,3 +316,4 @@
         .xs\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
 </style>
+    
