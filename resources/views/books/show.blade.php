@@ -6,14 +6,16 @@ use Carbon\Carbon;
 $fmt = function (?string $value): ?string {
     if (empty($value)) return null;
     try {
+        // Handle year only (4 digits)
         if (preg_match('/^\d{4}$/', $value)) {
-            return Carbon::createFromDate((int)$value, 1, 1)->format('d M y');
+            return $value; // Just return the year as-is
         }
+        // Handle year-month (YYYY-MM)
         if (preg_match('/^\d{4}-\d{2}$/', $value)) {
-            [$y, $m] = explode('-', $value);
-            return Carbon::createFromDate((int)$y, (int)$m, 1)->format('d M y');
+            return Carbon::createFromFormat('Y-m', $value)->format('M Y');
         }
-        return Carbon::parse($value)->format('d M y');
+        // Handle full date
+        return Carbon::parse($value)->format('d M Y');
     } catch (\Throwable $e) {
         return $value;
     }
