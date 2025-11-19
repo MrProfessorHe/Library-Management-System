@@ -127,14 +127,12 @@ DB_PASSWORD=
 - Run Mailpit: 
   ```
   mailpit
-
   ```
 - Mailpit runs at:
   ```
   SMTP: localhost:1025
 
   Inbox: http://localhost:8025
-  
   ```
 ### 2️⃣ Configure Laravel
 - In .env:
