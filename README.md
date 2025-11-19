@@ -112,9 +112,10 @@ DB_PASSWORD=
 ## ⚙️ Configuration
 
 - Set your database credentials in `.env`
-- (Optional) Add API keys for Google Books in `.env`:
+- Add API keys for Google Books and NYT(trending books fetching) in `.env`:
   ```
   GOOGLE_BOOKS_API_KEY=your_google_books_api_key
+  NYT_API_KEY=your_nyt_api_key_here
   ```
 
 ---
@@ -165,6 +166,19 @@ DB_PASSWORD=
 - `database/seeders/` - Initial data
 - `public/` - Public assets and entry point
 
+---
+
+## 🛅 To Login
+
+### For User
+- Path: `/login`
+- Gmail: user@gmail.com
+- Password: user1234
+
+### For Admin
+- Path: `/admin/login`
+- Gmail: admin@gmail.com
+- Password: admin123
 ---
 
 ## 📄 License
