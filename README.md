@@ -1,3 +1,6 @@
+<a id="readme-top"></a>
+
+<!-- PROJECT LOGO -->
 <p align="center">
   <a href="https://laravel.com" target="_blank">
     <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="300" alt="Laravel Logo">
@@ -15,12 +18,29 @@
 
 ---
 
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li><a href="#about-the-project">About The Project</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#installation-guide">Installation Guide</a></li>
+    <li><a href="#importing-library_db.sql-using-phpmyadmin">Importing <code>library_db.sql</code> using phpMyAdmin</a></li>
+    <li><a href="#configuration">Configuration</a></li>
+    <li><a href="#user-roles">User Roles</a></li>
+    <li><a href="#project-structure">Project Structure</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#credits">Credits</a></li>
+  </ol>
+</details>
+
+---
+
 ## 🚀 About the Project
 
 The **Library Management System** is a Laravel-based web application that helps manage:
 
 - 📖 Books (internal & external via Google Books API)
-- 👩‍💻 Users (Admin, Members, Guest)
+- 👩‍💻 Users (Admin, Guest, Members)
 - 🔄 Lending requests, approvals & rejections
 - ⏳ Due dates & fine management
 - 📊 Admin dashboards & reports
@@ -31,7 +51,7 @@ This system is designed for **schools, colleges, or public libraries** to simpli
 
 ## ⚡ Features
 
-- User authentication (Admin and Member)
+- User authentication (Admin, Guest, Member)
 - Search books (internal DB + Google Books API)
 - Borrowing & lending system with approval/rejection
 - Track overdue books & fines
@@ -98,9 +118,42 @@ DB_PASSWORD=
   ```
 
 ---
+## ✉️ Mailpit Installation & Configuration (Local Email Testing)
+
+### 1️⃣ Install Mailpit
+
+- Install Mailpit - https://github.com/axllent/mailpit/releases
+- Reffer youtube or google if get any trouble.
+- Run Mailpit: 
+  ```
+  mailpit
+
+  ```
+- Mailpit runs at:
+  ```
+  SMTP: localhost:1025
+
+  Inbox: http://localhost:8025
+  
+  ```
+### 2️⃣ Configure Laravel
+- In .env:
+  ```
+  MAIL_MAILER=smtp
+  MAIL_HOST=localhost
+  MAIL_PORT=1025
+  MAIL_USERNAME=null
+  MAIL_PASSWORD=null
+  MAIL_ENCRYPTION=null
+  MAIL_FROM_ADDRESS="library@example.com"
+  MAIL_FROM_NAME="Library Management System"
+
+  ```
+
 
 ## 👤 User Roles
 
+- **Guest:** Access to only to welcome page
 - **Admin:** Full access to all features
 - **Member:** Browse, borrow, and return books
 
@@ -126,3 +179,5 @@ This project is open-source and available under the [MIT license](LICENSE).
 ## 🙏 Credits
 
 Built with [Laravel](https://laravel.com/), [Tailwind CSS](https://tailwindcss.com/), and [MySQL](https://www.mysql.com/)
+
+<p align="right">(<a href="#readme-
