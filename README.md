@@ -26,8 +26,11 @@
     <li><a href="#installation-guide">Installation Guide</a></li>
     <li><a href="#importing-library_db.sql-using-phpmyadmin">Importing <code>library_db.sql</code> using phpMyAdmin</a></li>
     <li><a href="#configuration">Configuration</a></li>
+    <li><a href="#Mailpit-Installation-&-Configuration">Mailpit Installation & Configuration
+</a></li>
     <li><a href="#user-roles">User Roles</a></li>
     <li><a href="#project-structure">Project Structure</a></li>
+    <li><a href="#To-Login">To Login</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#credits">Credits</a></li>
   </ol>
@@ -119,7 +122,7 @@ DB_PASSWORD=
   ```
 
 ---
-## ✉️ Mailpit Installation & Configuration (Local Email Testing)
+## ✉️ Mailpit Installation & Configuration
 
 ### 1️⃣ Install Mailpit
 
@@ -190,5 +193,3 @@ This project is open-source and available under the [MIT license](LICENSE).
 ## 🙏 Credits
 
 Built with [Laravel](https://laravel.com/), [Tailwind CSS](https://tailwindcss.com/), and [MySQL](https://www.mysql.com/)
-
-<p align="right">(<a href="#readme-
