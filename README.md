@@ -145,7 +145,6 @@ DB_PASSWORD=
   MAIL_ENCRYPTION=null
   MAIL_FROM_ADDRESS="library@example.com"
   MAIL_FROM_NAME="Library Management System"
-
   ```
 
 
